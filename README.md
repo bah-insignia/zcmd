@@ -41,6 +41,14 @@ Update your ".bashrc" file, or ".profile" and log back in.
     * alias python="python3"
     * alias pip="pip3"
 
+Other Configuration Tweaks
+--------------------------
+Copy the zcmd/custom-profile-template.env file to zcmd/custom-profile.env and set
+the values to be appropriate for your host computer and user details.
+
+If you work in a team of people, consider sharing a single zcmd/team-profile.env
+based on the pattern shown in the zcmd/team-profile-template.env file.
+
 HELLO WORLD EXAMPLE STACK
 =========================
 Follow these steps to launch a simple demonstration stack using zcmd and
@@ -50,7 +58,7 @@ Create the place where we recommend placing your stacks...
 **Step 1: Create ~/docker-repos folder**
 
 Clone the demonstration stack...
-**Step 2: git clone https://github.com/frankfont/zcmd-demo-stack.git**
+**Step 2: git clone https://github.com/bah-insignia/zcmd-demo-stack**
 
 Go into the stack folder of your demonstration stack... 
 **Step 3: cd ~/docker-repos/stack**
@@ -82,10 +90,10 @@ devutils/zcmd_helpers
         global  -- commands that run from any folder
 
         machine -- commands that only run in a machine image folder
-                   NOTE: An image folder has "machine.env" file.
+                   NOTE: An image folder has **"machine.env" file**.
 
         stack   -- commands that only run from a docker stack folder
-                   NOTE: A stack folder has "stack.env" file. 
+                   NOTE: A stack folder has **"stack.env" file**. 
 
 devutils/zcmd_python
 
