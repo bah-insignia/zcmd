@@ -73,7 +73,20 @@ And finally, use one of the following commands to shut down your stack when you 
 * zcmd down <--- shuts down just the current stack
 * zcmd kill-all-containers <-- shuts down ALL stacks running 
 
-Tip: Edit the stack.env if you want to use a different port number.  More details about that stack are available on the https://github.com/frankfont/zcmd-demo-stack website.
+Tip: Edit the stack.env if you want to use a different port number.  More details about that stack are available on the https://github.com/bah-insignia/zcmd-demo-stack website.
+
+CORE UTILITIES IN THE FRAMEWORK
+===============================
+
+##ZCMD Utility
+The main utility is invoked by typing **zcmd** at the command prompt of a properly configured host computer's terminal.  Some command examples ...
+
+ * zcmd up <-- Starts a stack
+ * zcmd psa <-- Lists all existing container instances
+ * zcmd ct <-- Opens a terminal in a running container
+ * zcmd down <-- Shuts down a stack
+ * zcmd --help <-- Display all available options for the zcmd utility
+ * zcmd --help up <-- Display detailed help for the up command
 
 SOME FOLDERS EXPLAINED
 ======================
