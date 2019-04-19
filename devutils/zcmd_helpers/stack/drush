@@ -1,0 +1,71 @@
+#!/bin/bash
+
+VERSIONINFO="20181127.1"
+echo "Started $0 v$VERSIONINFO"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+#($HOME/zcmd/devutils/zc-check-is-stack-folder.sh)
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    echo
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+RUNTIME_CONTAINERNAME="TBD"
+source $HOME/zcmd/devutils/function-library/docker.bash
+lib_getRuntimeWebContainerName
+DOCKER_WEBSERVER="$RUNTIME_CONTAINERNAME"
+
+if [ ! -z "$DOCKER_WEBSERVER" ]; then
+    echo "FOUND runtime container $DOCKER_WEBSERVER"
+else
+    echo
+    echo "ERROR -- Did not find running DOCKER_WEBSERVER"
+    echo "         TIP: Is the stack running?"
+    echo
+    zcmd psa
+    exit 2
+fi
+
+#LAUNCH THE DOCKER COMMAND
+if [ -z "${DOCROOT_PATH}" ]; then
+    echo "NOTE: No 'DOCROOT_PATH' found so assuming default folder is the docroot"
+    CMD="docker exec ${RUNTIME_CONTAINERNAME} drush $@"
+else
+    echo "NOTE: Using '$DOCROOT_PATH' in container as the docroot"
+    CMD="docker exec -w ${DOCROOT_PATH} ${RUNTIME_CONTAINERNAME} drush $@"
+fi
+
+echo "CMD=$CMD"
+eval "$CMD"
+RESULTCODE=$?
+echo "CMD RESULTCODE=$RESULTCODE"
+if [ $RESULTCODE -ne 0 ]; then
+    if [ "$1" = "cc" ]; then
+        echo "Will now try cache-rebuild command instead ..."
+        if [ -z "${DOCROOT_PATH}" ]; then
+            CMD="docker exec ${RUNTIME_CONTAINERNAME} drush cache-rebuild"
+        else
+            CMD="docker exec -w ${DOCROOT_PATH} ${RUNTIME_CONTAINERNAME} drush cache-rebuild"
+        fi        
+        echo "CMD=$CMD"
+        eval "$CMD"
+        RESULTCODE=$?
+        echo "CMD RESULTCODE=$RESULTCODE"
+    else
+        if [ -z "${DOCROOT_PATH}" ]; then
+            echo
+            echo "TIP: If container default directory is not your docroot folder"
+            echo "     then set DOCROOT_PATH in your stack.env to the full path"
+            echo "     of the actual docroot."
+        fi
+        exit 1
+    fi
+fi
+echo

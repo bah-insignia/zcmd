@@ -1,0 +1,7 @@
+PURPOSE
+-------
+Shut down the docker stack defined by the current directory.
+
+SYNTAX
+------
+zcmd down

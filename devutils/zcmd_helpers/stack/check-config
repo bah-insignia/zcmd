@@ -1,0 +1,107 @@
+#!/bin/bash
+
+VERSIONINFO="20180514.1"
+echo "Started $0 v$VERSIONINFO"
+
+ERROR_TYPE_NAMES=""
+HAS_ERRORS="TBD"
+HAS_WARNINGS="TBD"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/find-files.bash
+source $HOME/zcmd/devutils/function-library/permissions.bash
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+#($HOME/zcmd/devutils/zc-check-is-stack-folder.sh)
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+#Create list of volume names
+if [ -z "$KEY_VOLUME_NAMES" ]; then
+    #No KEY list provided so create a reasonable guess
+    echo "... No KEY volume name list provided, checking default pattern"
+    NAMES="$WEB_FILES_VOLUME_NAME $DB_FILES_VOLUME_NAME $SOLR_FILES_VOLUME_NAME"
+else
+    echo "... KEY volume name list provided!"
+    NAMES=$KEY_VOLUME_NAMES
+fi
+if [ -z "$NAMES" ]; then
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "... NO KEY VOLUME NAMES DETECTED!"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+else
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "... KEY VOLUME NAMES ARE: $NAMES"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+fi
+
+#Declare the commands
+V_CHECK="$HOME/zcmd/devutils/zc-check-volume-config.sh $NAMES"
+DA_CHECK="$HOME/zcmd/devutils/zc-check-local-dumparea.sh"
+USER_CHECK="$HOME/zcmd/devutils/zc-check-useraccount.sh $WEB_FILES_VOLUME_NAME"
+APP_CHECK="$HOME/zcmd/devutils/zc-check-apps.sh"
+
+#Run the checks
+eval $V_CHECK
+STATUS_CD=$?
+echo "Completion status code [${STATUS_CD}]"
+if [ $STATUS_CD -eq 1 ]; then
+    HAS_WARNINGS="YES"
+fi
+if [ $STATUS_CD -gt 1 ]; then
+    HAS_ERRORS="YES"
+    ERROR_TYPE_NAMES="$ERROR_TYPE_NAMES VOLUMES"
+fi
+
+eval $DA_CHECK
+STATUS_CD=$?
+echo "Completion status code [${STATUS_CD}]"
+if [ $STATUS_CD -eq 1 ]; then
+    HAS_WARNINGS="YES"
+fi
+if [ $STATUS_CD -gt 1 ]; then
+    HAS_ERRORS="YES"
+    ERROR_TYPE_NAMES="$ERROR_TYPE_NAMES DUMPAREA"
+fi
+
+eval $USER_CHECK
+STATUS_CD=$?
+echo "Completion status code [${STATUS_CD}]"
+if [ $STATUS_CD -eq 1 ]; then
+    HAS_WARNINGS="YES"
+fi
+if [ $STATUS_CD -gt 1 ]; then
+    HAS_ERRORS="YES"
+    ERROR_TYPE_NAMES="$ERROR_TYPE_NAMES USERACCOUNTS"
+fi
+
+eval $APP_CHECK
+STATUS_CD=$?
+echo "Completion status code [${STATUS_CD}]"
+if [ $STATUS_CD -eq 1 ]; then
+    HAS_WARNINGS="YES"
+fi
+if [ $STATUS_CD -gt 1 ]; then
+    HAS_ERRORS="YES"
+fi
+
+if [ "YES" = "$HAS_WARNINGS" ]; then
+    echo "NOTE: Found one or more warnings on config check ... look above for details."
+fi
+
+if [ "YES" = "$HAS_ERRORS" ]; then
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "FOUND ONE OR MORE ERRORS ON CONFIG CHECK!  LOOK ABOVE FOR INFO!"
+    echo "TYPE(S): $ERROR_TYPE_NAMES"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+    #Trigger error handler in caller
+    exit 2
+fi
+
+echo "Completed $0 without errors detected"

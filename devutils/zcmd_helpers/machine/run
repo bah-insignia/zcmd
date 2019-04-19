@@ -1,0 +1,87 @@
+#!/bin/bash
+#Updated 20190418.1
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isMachineImageFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid machine context folder."
+    exit 2
+fi
+
+source machine.env
+
+if [ ! -z "$1" ]; then
+    IMAGE_NAME=$1
+    TAGNAME=$2
+else
+    IMAGE_NAME=${LOCAL_IMAGE_NAME}
+    TAGNAME="latest"
+fi
+if [ -z "$TAGNAME" ]; then
+    TAGNAME="latest"
+fi
+
+LOCAL_IMAGE="local/$IMAGE_NAME"
+
+CREATE_CMD=$HOME/zcmd/devutils/zcmd_helpers/machine/create
+
+MAP_PORTS=""
+echo "CHECKING MACHINE_PORT80=$MACHINE_PORT80"
+if [ ! -z "$MACHINE_PORT80" ]; then
+    MAP_PORTS="$MAP_PORTS -p ${MACHINE_PORT80}:80"
+fi
+
+echo "CHECKING MACHINE_PORT443=$MACHINE_PORT443"
+if [ ! -z "$MACHINE_PORT443" ]; then
+    MAP_PORTS="$MAP_PORTS -p ${MACHINE_PORT443}:443"
+fi
+
+echo "CHECKING MACHINE_PORT8025=$MACHINE_PORT8025"
+if [ ! -z "$MACHINE_PORT8025" ]; then
+    MAP_PORTS="$MAP_PORTS -p ${MACHINE_PORT8025}:8025"
+fi
+
+echo "CHECKING MACHINE_PORT3306=$MACHINE_PORT3306"
+if [ ! -z "$MACHINE_PORT3306" ]; then
+    MAP_PORTS="-p ${MACHINE_PORT3306}:3306"
+fi
+
+PWD=$(pwd)
+if [ -f "${PWD}/DEPRECATED.txt" ]; then
+    echo
+    echo "WARNING: ${PWD} is DEPRECATED"
+    echo
+    echo "==========================================================================="
+    echo
+    cat ${PWD}/DEPRECATED.txt
+    echo
+    echo "==========================================================================="
+    echo
+    sleep 2
+fi
+
+RUN_CMD="docker run -ti --rm $MAP_PORTS $LOCAL_IMAGE /bin/bash"
+
+echo $RUN_CMD
+eval $RUN_CMD
+STATUS_CODE=$?
+
+echo "EXIT CODE=$STATUS_CODE"
+if [ $STATUS_CODE -ne 0 ]; then
+    REMOTE_IMAGE="${PRIVATE_DOCKER_REGISTRY}/${IMAGE_NAME}"
+    echo "Possibly failed to run $LOCAL_IMAGE image, will now try $REMOTE_IMAGE"
+    RUN_CMD="docker run -ti $MAP_PORTS $REMOTE_IMAGE /bin/bash"
+    echo $RUN_CMD
+    eval $RUN_CMD
+    STATUS_CODE=$?
+    echo "EXIT CODE=$STATUS_CODE"
+fi
+exit $STATUS_CODE
+
+
+
+
+
+

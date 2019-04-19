@@ -1,0 +1,43 @@
+#!/bin/bash
+ACTION="restart"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+PWD=$(pwd)
+if [ -f "${PWD}/DEPRECATED.txt" ]; then
+    echo
+    echo "WARNING: ${PWD} is DEPRECATED"
+    echo
+    echo "==========================================================================="
+    echo
+    cat ${PWD}/DEPRECATED.txt
+    echo
+    echo "==========================================================================="
+    echo
+    sleep 2
+fi
+
+#Start our network if not already started
+
+THISFOLDERNAME=${PWD##*/}
+if [ ! "admin" = "$THISFOLDERNAME" ]; then
+    echo "Lets check on admin stack!"
+    eval "$HOME/zcmd/devutils/zc-start-admin_webnet.sh"
+else
+    echo "...already in $THISFOLDERNAME stack!"
+fi
+
+#Do the magic restart stuff now...
+zcmd down && echo "## DOWN COMPLETING ..." && sleep 4 && zcmd psa && echo "##" && echo "## STARTUP WILL BEGIN SHORTLY..." && sleep 2 && echo "## ..." && zcmd up
+echo
+echo "Done launching all commands in $0"
+echo

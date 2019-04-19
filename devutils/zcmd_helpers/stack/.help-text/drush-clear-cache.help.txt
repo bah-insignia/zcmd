@@ -1,0 +1,17 @@
+PURPOSE
+-------
+Attempts to clear all drupal cache information using drush.
+
+SYNTAX
+------
+zcmd drush-clear-cache
+
+REQUIREMENTS
+------------
+The webserver container must be running and must have drush installed.
+
+NOTE
+----
+This is a shortcut for the following command ...
+
+    zmcd drush cc all

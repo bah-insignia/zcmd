@@ -1,0 +1,20 @@
+PURPOSE
+-------
+Tails the apache log 
+
+SYNTAX
+------
+zcmd tail-log [NUMBER_OF_LINES]
+
+REQUIREMENTS
+------------
+The command assumes your webserver container is writing log files
+into the /var/log/apache2/error.log path.  If your webserver apache 
+log is in a different path, set the WEB_INTERNAL_PATH_ERROR_LOG variable
+in your stack.env to what it is for you.
+
+NOTE
+----
+The command tries to guess at your container name, but you can 
+provide a name by setting the CONTAINER_NAME_WEB variable in stack.env
+

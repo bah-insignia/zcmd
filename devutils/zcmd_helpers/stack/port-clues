@@ -1,0 +1,43 @@
+#!/bin/bash
+ACTION="port-clues"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+PWD=$(pwd)
+if [ -f "${PWD}/DEPRECATED.txt" ]; then
+    echo
+    echo "WARNING: ${PWD} is DEPRECATED"
+    echo
+    echo "==========================================================================="
+    echo
+    cat ${PWD}/DEPRECATED.txt
+    echo
+    echo "==========================================================================="
+    echo
+    sleep 2
+fi
+
+#Output the interesting info now
+KEYWORD="PORT"
+echo
+echo "### LISTING DEFAULT ENV TXT ..."
+cat $HOME/zcmd/devutils/default-docker-env.txt | grep "$KEYWORD" | grep -v \#
+echo
+echo "### LISTING STACK PORT DECLARATIONS ..."
+cat ./stack.env | grep "$KEYWORD" | grep -v \#
+echo
+echo "### LISTING DOCKER COMPOSE PORT DECLARATIONS ..."
+cat ./docker-compose.yml | grep "$KEYWORD" | grep -v \#
+echo
+
+echo "Done with all listings of '${KEYWORD}' in files."
+echo

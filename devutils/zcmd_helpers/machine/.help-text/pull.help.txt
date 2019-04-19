@@ -1,0 +1,14 @@
+PURPOSE
+-------
+Pull down into our local cache the publicly hosted image with the name
+defined in our machine.env file.
+
+SYNTAX
+------
+zcmd pull
+
+NOTE
+----
+Equivalent of running the following command ...
+
+    docker pull ${PRIVATE_DOCKER_REGISTRY}/${PUBLIC_IMAGE_NAME}:latest

@@ -1,0 +1,44 @@
+#!/bin/bash
+ACTION="pull"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+#Start our network if not already started
+
+THISFOLDERNAME=${PWD##*/}
+if [ ! "admin" = "$THISFOLDERNAME" ]; then
+    echo "Lets check on admin stack!"
+    eval "$HOME/zcmd/devutils/zc-start-admin_webnet.sh"
+else
+    echo "...already in $THISFOLDERNAME stack!"
+fi
+
+echo
+echo "=== START OF CORE IMAGE PULL ============================================="
+if [ -z "$GLOBAL_CORE_CUSTOM_IMAGE_LIST" ]; then
+    echo "WARNING -- No core images defined!"
+fi
+for PUBLIC_IMAGE_NAME in ${GLOBAL_CORE_CUSTOM_IMAGE_LIST//,/ }
+do
+    TAGNAME=latest
+    IMAGEREF="${PRIVATE_DOCKER_REGISTRY}/${PUBLIC_IMAGE_NAME}:${TAGNAME}"
+    PULL_CMD="docker pull $IMAGEREF"
+    echo $PULL_CMD
+    eval $PULL_CMD
+done
+echo "=== END OF CORE IMAGE PULL ==============================================="
+echo
+
+#Launch our stack
+echo "Start stack $ACTION $1"
+(cd $(pwd) && $HOME/zcmd/devutils/zc-compose.sh $ACTION $1)
+

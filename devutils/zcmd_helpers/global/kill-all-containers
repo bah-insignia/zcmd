@@ -1,0 +1,60 @@
+#!/bin/bash
+
+VERSIONINFO="20180808.1"
+echo "Started $0 v$VERSIONINFO"
+
+THELIST=$(docker container ls | awk '{print $NF}')
+
+echo
+COUNTER=0
+for NAME in $(echo $THELIST); do
+  if [ ! "$NAME" = "NAMES" ]; then
+    COUNTER=$((COUNTER + 1))
+    echo "${COUNTER})  $NAME"
+  fi
+done
+
+if [ $COUNTER -eq 0 ]; then
+    echo
+    echo "No running containers found!"
+    echo
+else
+    echo
+    echo "PRESS CTRL-C now to ABORT else ENTER to kill all $COUNTER containers"
+    read
+    echo
+
+    for NAME in $(echo $THELIST); do
+      if [ ! "$NAME" = "NAMES" ]; then
+        echo "=== Now processing container named $NAME"
+        echo
+        echo "Will remove container called '$NAME' ..."
+        echo "... stop"
+        docker container stop $NAME
+        echo "... rm"
+        docker container rm $NAME
+        echo
+      fi
+    done
+
+    echo
+    echo "Killed $COUNTER containers!"
+    echo
+fi
+
+ROWCOUNT=$(docker ps | wc -l)
+if [ "1"="$ROWCOUNT" ]; then
+    echo
+    echo "All containers are gone!"
+    echo
+else
+    echo
+    echo "Running docker ps -a ..."
+    docker ps -a
+
+    echo "NOTE: To completely remove all stopped containers simply issue this command..."
+    echo "      docker container prune"
+    echo
+fi
+
+    

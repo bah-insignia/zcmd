@@ -1,0 +1,18 @@
+PURPOSE
+-------
+Create a container of the specified image and then open a terminal into 
+that container as the root user.
+
+SYNTAX
+------
+zcmd run-image IMAGENAME [CONTAINERNAME [MAP_PORT_EXT MAP_PORT_INT]]
+
+    IMAGENAME=Image to use
+    CONTAINERNAME=Optional, name to give to this container
+    MAP_PORT_EXT=Optional, external port number mapped to MAP_PORT_INT
+    MAP_PORT_INT=Optional, internal port number mapped to MAP_PORT_EXT
+
+WARNING
+-------
+Its up to you to manually clean up the container when you are  done.  It will
+persist in your runtime space until you stop/kill/prune it.

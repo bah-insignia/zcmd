@@ -1,0 +1,1 @@
+sudo dscl . append /Groups/{group} GroupMembership {username}

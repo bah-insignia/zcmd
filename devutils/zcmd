@@ -1,0 +1,289 @@
+#!/bin/bash
+ZCMD_VERSIONINFO="20190417.1"
+DASH_HELP_OPTION="--help"
+DASH_VERSION_OPTION="--version"
+DASH_ENV_NAME_OPTION="--environment-name"
+DASH_ENV_INFO_OPTION="--environment-info"
+DASH_ENV_INFO_SHORT_OPTION="-ei"
+
+#Do they just want version info?
+if [ "${DASH_VERSION_OPTION}" = "$1" ]; then
+    #Important ONLY output the version string!
+    echo $ZCMD_VERSIONINFO
+    exit 0
+fi
+
+#Check for required environment vars
+if [ -z "$ZCMD_HOME" ]; then
+    echo "Aborting $0 v$ZCMD_VERSIONINFO"
+    echo "##############################################################################"
+    echo "ERROR: Configuration problem! Missing required ZCMD_HOME environment variable!"
+    echo "TIP: Update your .bashrc to set it to the location of your zcmd folder."
+    echo "     export ZCMD_HOME=thepath"
+    echo "##############################################################################"
+    echo
+    exit 2
+fi
+
+source $ZCMD_HOME/devutils/default-docker-env.txt
+
+if [ "${DASH_ENV_NAME_OPTION}" = "$1" ]; then
+    #Important that there be NO OTHER text in the output!
+    if [ -z "$ENVIRONMENT_NAME" ]; then
+        #Provide a name that gives a clue to the error!
+        WHOAMI=$(whoami)
+        HOSTNAME=$(hostname)
+        echo "ZCMD-ERROR-MISSING-ENVIRONMENT_NAME-${HOSTNAME}-${WHOAMI}"
+        exit 2
+    fi
+    echo "$ENVIRONMENT_NAME"
+    exit 0
+fi
+
+if [ "${DASH_ENV_INFO_OPTION}" = "$1" ] || [ "${DASH_ENV_INFO_SHORT_OPTION}" = "$1" ]; then
+    echo "ZCMD_VERSIONINFO            = $ZCMD_VERSIONINFO"
+    echo "ZCMD_TEAM_ENV_VERSIONINFO   = $ZCMD_TEAM_ENV_VERSIONINFO"
+    echo "ZCMD_CUSTOM_ENV_VERSIONINFO = $ZCMD_CUSTOM_ENV_VERSIONINFO"
+    echo
+    echo "IS_PRODUCTION       = $IS_PRODUCTION"
+    echo "ENVIRONMENT_CONTEXT = $ENVIRONMENT_CONTEXT"
+    echo "ENVIRONMENT_NAME    = $ENVIRONMENT_NAME"
+    exit 0
+fi
+
+source $HOME/zcmd/devutils/function-library/check-context.bash 
+
+PWD=$(pwd)
+HELPERSROOTPATH="$HOME/zcmd/devutils/zcmd_helpers"
+STACK_COMMANDS=$(cd $HELPERSROOTPATH/stack && ls)
+MACHINE_COMMANDS=$(cd $HELPERSROOTPATH/machine && ls)
+GLOBAL_COMMANDS=$(cd $HELPERSROOTPATH/global && ls)
+
+function showUsage()
+{
+    local CONTEXT_NAME=$1
+    echo " "
+    echo "Usage: zcmd COMMAND [optional command arguments]"
+    echo
+    if [ -z "$CONTEXT_NAME" ] || [ "stack" = "$CONTEXT_NAME" ] || [ "showall" = "$CONTEXT_NAME" ]; then
+        echo "STACK COMMAND options (work from stack folders) ..."
+        echo "$STACK_COMMANDS"
+        echo
+    fi
+    if [ -z "$CONTEXT_NAME" ] || [ "machine" = "$CONTEXT_NAME" ] || [ "showall" = "$CONTEXT_NAME" ]; then
+        echo "MACHINE COMMAND options (work from machine folders) ..."
+        echo "$MACHINE_COMMANDS"
+        echo
+    fi
+    echo "GLOBAL COMMAND options (work from any folder) ..."
+    echo "$GLOBAL_COMMANDS"
+    echo
+    echo "OTHER options ..."
+    echo "$DASH_HELP_OPTION [COMMAND_NAME]"
+    echo "$DASH_VERSION_OPTION"
+    echo "$DASH_ENV_NAME_OPTION"
+    echo "$DASH_ENV_INFO_OPTION, $DASH_ENV_INFO_SHORT_OPTION"
+    echo " "
+}
+
+#Trap param BEFORE we output any text
+if [ "JUST_SHOW_OPTIONS" = "$1" ]; then
+    #NOTE -- This output is used by command completion logic!
+    lib_isRuntimeStackFolder
+    if [ $? -eq 0 ]; then
+        echo $DASH_HELP_OPTION $STACK_COMMANDS
+    else
+        lib_isMachineImageFolder
+        if [ $? -eq 0 ]; then
+            echo $DASH_HELP_OPTION $MACHINE_COMMANDS
+        fi
+    fi
+    echo $DASH_HELP_OPTION $GLOBAL_COMMANDS
+    exit 0
+fi
+
+#Tell the user we are running
+echo "# Started ZCMD ($0) v$ZCMD_VERSIONINFO ..."
+echo "# ... invoked from $PWD"
+
+#Set the CONTEXT_NAME variable
+lib_isRuntimeStackFolder
+if [ $? -eq 0 ]; then
+    CONTEXT_NAME="stack"
+else
+    lib_isMachineImageFolder
+    if [ $? -eq 0 ]; then
+        CONTEXT_NAME="machine"
+    else
+        CONTEXT_NAME="global"
+    fi
+fi
+
+if [ -z "$1" ]; then
+    echo " "
+    echo "NO COMMAND SPECIFIED"
+    showUsage "$CONTEXT_NAME"
+    exit 2
+fi
+
+#Do they want fancy help?
+if [ "--help" = "$1" ]; then
+
+    #Yes, they want fancy help!
+    HELP4CMD="$2"
+    if [ -z "$HELP4CMD" ]; then
+        echo " "
+        echo "Showing general help ..."
+        showUsage "showall"
+        echo " "
+        exit 0
+    fi
+    LOCK_CONTEXT_NAME="NO"
+    if [ "machine" = "$HELP4CMD" ]; then
+        LOCK_CONTEXT_NAME="YES"
+        CONTEXT_NAME="$HELP4CMD"
+        HELP4CMD="$3"
+    fi
+    if [ "stack" = "$HELP4CMD" ]; then
+        LOCK_CONTEXT_NAME="YES"
+        CONTEXT_NAME="$HELP4CMD"
+        HELP4CMD="$3"
+    fi
+    if [ "global" = "$HELP4CMD" ]; then
+        LOCK_CONTEXT_NAME="YES"
+        CONTEXT_NAME="$HELP4CMD"
+        HELP4CMD="$3"
+    fi
+
+    if [ "NO" = "$LOCK_CONTEXT_NAME" ]; then
+        #Switch to global if not in current context
+        if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${HELP4CMD}" ]; then
+            CONTEXT_NAME='global'
+            if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${HELP4CMD}" ]; then
+                #Undefined command!
+                echo
+                echo "BAD ARGUMENT!  There is no command '$HELP4CMD'!"
+                echo
+                echo "Showing general help ..."
+                showUsage "showall"
+                echo " "
+                exit 2
+            fi
+        fi
+    fi
+
+    #Show specific help, if it exists
+    HELPFILENAME="${HELP4CMD}.help.txt"
+    HELPFILEDIR="${HELPERSROOTPATH}/${CONTEXT_NAME}/.help-text"
+    HELPFILEPATH="${HELPFILEDIR}/${HELPFILENAME}"
+    if [ ! -f "$HELPFILEPATH" ]; then
+        echo
+        if [ ! -z "$HELP4CMD" ]; then
+            #Tell them there is no file matching that command yet
+            echo " "
+            echo "Did NOT find $HELPFILEPATH"
+            echo
+        fi
+        echo "Currently existing '${CONTEXT_NAME}' context help files are ..."
+        echo "*** Start of existing help files ***"
+        ls $HELPFILEDIR
+        echo "*** End of existing help files ***"
+        echo
+        exit 2
+    else
+        #Show the file contents
+        echo
+        echo "Help for zcmd ${HELP4CMD} ..."
+        echo " "
+        echo "==============================================================================="
+        cat $HELPFILEPATH
+        echo "==============================================================================="
+        echo
+        exit 0
+    fi
+
+fi
+
+#Because we cannot pass $@ to function
+TOPARG2=$2
+TOPARG3=$3
+TOPARG4=$4
+TOPARG5=$5
+TOPARG6=$6
+TOPARG7=$7
+TOPARG8=$8
+
+function runCommand()
+{
+    local CONTEXT_NAME=$1
+    local COMMAND_NAME=$2
+    local FULL_COMMAND="$COMMAND_NAME $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
+
+    if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
+        CONTEXT_NAME='global'
+        if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
+            #Undefined command!
+            return 2
+        fi
+    fi
+
+    echo "#Will now launch ${CONTEXT_NAME} context command ${COMMAND_NAME} from folder $(pwd) ..."
+    COMPLETE_COMMAND="$HELPERSROOTPATH/${CONTEXT_NAME}/$FULL_COMMAND"
+    echo "#>>> $COMPLETE_COMMAND"
+    (cd $(pwd) && eval "$COMPLETE_COMMAND")
+    return $?
+}
+
+lib_isRuntimeStackFolder
+if [ $? -eq 0 ]; then
+
+    echo " "
+    runCommand "stack" $1
+    CMD_STATUS=$?
+    if [ $CMD_STATUS -gt 1 ]; then
+        if [ $CMD_STATUS -gt 10 ]; then
+            #This probably not an error of zcmd usage
+            echo "ERROR CODE: $CMD_STATUS"
+            exit $CMD_STATUS
+        else
+            #Might be an error of zcmd usage
+            echo " "
+            echo "ERROR INVALID RUNTIME STACK CONTEXT COMMAND: $@"
+            showUsage "stack"
+            exit 2
+        fi
+    fi
+    echo " "
+
+else
+
+    lib_isMachineImageFolder
+    if [ $? -eq 0 ]; then
+        echo " "
+        runCommand "machine" $1
+        CMD_STATUS=$?
+        if [ $CMD_STATUS -gt 1 ]; then
+            echo " "
+            echo "ERROR INVALID MACHINE IMAGE CONTEXT COMMAND: $@"
+            showUsage "machine"
+            exit 2
+        fi
+        echo " "
+    else
+        #Just global commands allowed
+        echo " "
+        runCommand "global" $1
+        CMD_STATUS=$?
+        if [ $CMD_STATUS -gt 1 ]; then
+            echo " "
+            echo "ERROR INVALID GLOBAL CONTEXT COMMAND: $@"
+            showUsage "global"
+            exit 2
+        fi
+        echo " "
+    fi
+
+fi
+    
+#If we are here we had success
+exit 0

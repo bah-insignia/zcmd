@@ -1,0 +1,17 @@
+PURPOSE
+-------
+Stop a running container and then show listing of containers.
+
+SYNTAX
+------
+zcmd stop [CONTAINERNAME]
+
+    CONTAINERNAME = Optional, defaults to value derived from LOCAL_IMAGE_NAME
+                    of the machine.env file.
+
+NOTE
+----
+Equivalent of typing the following commands ...
+
+    docker container stop CONTAINERNAME
+    docker ps -a

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+VERSIONINFO="20190201.1"
+echo "Started $0 v$VERSIONINFO"
+
+PYSCRIPT="db-import.py"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+ZCMD_STACK_PATH=$(pwd)
+
+STACK_ENV_FILE_PATH="${ZCMD_STACK_PATH}/stack.env"
+source $STACK_ENV_FILE_PATH
+
+if [ -z "$APP_PLATFORM_NAME" ]; then
+    echo "ERROR: No APP_PLATFORM_NAME declared stack.env!"
+    echo "       Fix in $STACK_ENV_FILE_PATH"
+    exit 1
+fi
+if [ -z "$APP_PLATFORM_MAJOR_VERSION" ]; then
+    echo "ERROR: No APP_PLATFORM_MAJOR_VERSION declared stack.env!"
+    echo "       Fix in $STACK_ENV_FILE_PATH"
+    exit 1
+fi
+
+APP_PLATFORM_ID="${APP_PLATFORM_NAME}${APP_PLATFORM_MAJOR_VERSION}"
+
+CMD="python3 $HOME/zcmd/devutils/zcmd_python/stack/$PYSCRIPT"
+echo $CMD
+
+(cd $(pwd) && $HOME/zcmd/devutils/zc-python-stack-launch.sh $PYSCRIPT ${APP_PLATFORM_NAME} ${APP_PLATFORM_MAJOR_VERSION} $1 $2 $3 $4 $5 $6 $7 $8)
+EC=$?
+if [ $EC -ne 0 ]; then
+    echo "EXIT CODE NOT ZERO! VALUE=$EC"
+fi
+
+echo
+echo "Finished $0 with exit code $EC"
+echo

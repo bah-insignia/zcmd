@@ -1,0 +1,44 @@
+PURPOSE
+-------
+Import Drupal website assets from S3 into the assets directory of the 
+current stack's Drupal webserver.
+
+SYNTAX
+------
+zcmd import-assets [--pick-from-list] | [FOLDERSUFFIX [PROJNAME]]
+
+    --pick-from-list = Triggers display of a pick list where you see all
+                       available database backups and can pick one to import.
+    
+    Alternative inputs ...
+    FOLDERSUFFIX = The tail end of the foldername containing the site assets
+                   that we want to 'rsync' into our local website.  The format
+                   of FOLDERSUFFIX is generally as follows ...
+
+                       SourceEnvName-SourceDocrootFolderName
+
+                   SourceEnvName = See stack.env for project specific name
+                   SourceDocrootFolderName = Folder name the website lives on 
+                                             the source server
+
+EXAMPLES
+--------
+Pick from a list ...
+
+    zcmd import-assets --pick-from-list
+
+Import the assets from the STAGE asset backup ...
+
+    zcmd import-assets stage-html
+
+Import the assets from the PROD asset backup ...
+
+    zcmd import-assets prod-html
+
+NOTE
+----
+The source of all the backups is the SHARED_S3_STAGING_BUCKET_NAME S3 bucket and the 
+script knows what project to pull from based on the PROJECT_NAME value
+in the stack.env file.
+
+The backups themselves are created using the web-utils on the source servers.

@@ -1,0 +1,20 @@
+PURPOSE
+-------
+Fire up the docker stack defined by the current directory.
+
+SYNTAX
+------
+zcmd up [ENVIRONMENT_CONTEXT] [COMPOSE_CMDARGS]
+
+Where ...
+
+ENVIRONMENT_CONTEXT = Optional override of the default value (e.g., pass PROD
+                      or STAGE as the value to override your default DEV value.)
+
+                      NOTE: To see if your stack supports different configurations
+                            by ENVIRONMENT_CONTEXT, look for that name in the
+                            docker-compose.yml of your stack.
+
+COMPOSE_CMDARGS     = Optional support for passing some docker-compose command
+                      line arguments.
+

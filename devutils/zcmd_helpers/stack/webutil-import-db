@@ -1,0 +1,176 @@
+#!/bin/bash
+
+VERSIONINFO="20190222.1"
+
+echo "Started $0 v$VERSIONINFO"
+echo "USAGE: import-db RAWSUFFIX [PROJECTNAME]"
+echo
+
+RAWSUFFIX=$1
+PROJECTNAME=$2
+
+if [ -z "$RAWSUFFIX" ]; then
+    RAWSUFFIX="--pick-from-list"
+fi
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+#($HOME/zcmd/devutils/zc-check-is-stack-folder.sh)
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+source ./stack.env
+
+if [ ! -z "$PROJECTNAME" ]; then
+  echo "PROJECT NAME OVERRIDE=$PROJECTNAME"
+else
+    if [ ! -z "$LEGACY_PROJECT_NAME" ]; then
+        PROJECTNAME=$LEGACY_PROJECT_NAME
+        echo "Using standard LEGACY project name as prefix"
+    else
+        PROJECTNAME=$PROJECT_NAME
+        echo "Using standard project name as prefix"
+    fi
+fi
+echo "  PROJECTNAME=$PROJECTNAME"
+
+function pickRAWSUFFIX()
+{
+
+    S3_URL="${SHARED_S3_BUCKET}"
+    GREP=" | grep 'database-dumps'"
+    PV=$(which pv)
+    if [ -z "$PV" ]; then
+        CMD="aws s3 ls ${S3_URL} --recursive | grep 'database-dumps/$PROJECTNAME' | grep 'schema-' | awk -F'schema-' '{print \$2}' | awk -F'.' '{print \$1}'"
+    else
+        CMD="aws s3 ls ${S3_URL} --recursive | pv | grep 'database-dumps/$PROJECTNAME' | grep 'schema-' | awk -F'schema-' '{print \$2}' | awk -F'.' '{print \$1}'"
+    fi
+    echo "LISTING AVAILABLE DATABASE DUMPS SUFFIX OPTIONS: $CMD"
+    #eval $CMD
+
+    unset options i
+    i=0
+    for NAME in $(eval $CMD); do
+      if [ ! "$NAME" = "NAMES" ]; then
+        options[i++]="$NAME"
+      fi
+    done
+
+    select OPT in "${options[@]}" "QUIT"; do
+      case $OPT in
+        *_*)
+          echo "RAWSUFFIX named $OPT selected ..."
+          echo
+          RAWSUFFIX="$OPT"
+          break
+          ;;
+        "QUIT")
+          echo "Exiting the script now!"
+          echo
+          RAWSUFFIX=""
+          break
+          ;;
+        *)
+          echo "This is not an option"
+          ;;
+      esac
+    done
+
+}
+
+if [ "--pick-from-list" = "$RAWSUFFIX" ]; then
+    pickRAWSUFFIX
+
+    if [ -z "$RAWSUFFIX" ]; then
+        echo
+        echo "QUIT BECAUSE NOT DATABASE DUMP SUFFIX NAME PROVIDED!"
+        echo
+        exit 2
+    fi
+
+fi
+
+DATABASE=$DATABASE_NAME
+
+USERNAME='root'
+PASSWORD=$MYSQL_ROOT_PASSWORD
+HOST='127.0.0.1'
+PORT=$DB_PORT3306
+
+if [ -z "$DATABASE_NAME" ]; then
+    echo "CORRUPT stack.env!  Missing DATABASE_NAME"
+    echo
+    break 1
+fi
+
+if [ -z "$DB_PORT3306" ]; then
+    echo "CORRUPT stack.env!  Missing DB_PORT3306"
+    echo
+    break 1
+fi
+
+if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
+    echo "CORRUPT stack.env!  Missing MYSQL_ROOT_PASSWORD"
+    echo
+    break 1
+fi
+
+~/zcmd/devutils/zc-docker-container.sh IS_RUNNING_WILDCARD $SERVICE_NAME_DB
+if [ $? -ne 0 ]; then
+    echo "Database engine not running, will attempt to start now..."
+    zcmd up
+    echo "***********************************************"
+    echo "** WILL SLEEP FOR 30 SECONDS FOR DB TO START **"
+    echo "***********************************************"
+    sleep 5
+    echo "***********************************************"
+    echo "... 25 more seconds"
+    echo "***********************************************"
+    sleep 5
+    echo "***********************************************"
+    echo "... 20 more seconds"
+    echo "***********************************************"
+    sleep 5
+
+    $HOME/zcmd/devutils/zc-docker-container.sh IS_RUNNING_WILDCARD $SERVICE_NAME_DB
+    if [ $? -ne 0 ]; then
+        echo "***********************************************"
+        echo "... 15 more seconds"
+        echo "***********************************************"
+        sleep 5
+        echo "***********************************************"
+        echo "... 10 more seconds"
+        echo "***********************************************"
+        sleep 5
+        echo "***********************************************"
+        echo "... 5 more seconds"
+        echo "***********************************************"
+        sleep 5
+    else
+        echo "It started early!"
+    fi
+    $HOME/zcmd/devutils/zc-docker-container.sh IS_RUNNING_WILDCARD $SERVICE_NAME_DB
+    if [ $? -ne 0 ]; then
+        echo "***********************************************"
+        echo "***********************************************"
+        echo "***********************************************"
+        echo "Please start the admin stack manually!"
+        echo "GAVE UP WAITING FOR ADMIN TO START"
+        echo "***********************************************"
+        echo "***********************************************"
+        echo "***********************************************"
+        exit 2
+    fi
+    echo "***********************************************"
+    echo "*** Moving on to the database import now ......"
+    echo "***********************************************"
+fi
+
+$HOME/zcmd/devutils/zc-import-app-db.sh $PROJECTNAME $DATABASE $USERNAME $PASSWORD $HOST $PORT $RAWSUFFIX
+if [ $? -ne 0 ]; then
+    echo "FAILED $0"
+    exit 2
+fi

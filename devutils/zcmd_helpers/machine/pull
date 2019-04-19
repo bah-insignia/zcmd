@@ -1,0 +1,16 @@
+#!/bin/bash
+ACTION="pull"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isMachineImageFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid machine context folder."
+    exit 2
+fi
+
+source machine.env
+TAGNAME=latest
+IMAGEREF="${PRIVATE_DOCKER_REGISTRY}/${PUBLIC_IMAGE_NAME}:${TAGNAME}"
+docker pull $IMAGEREF

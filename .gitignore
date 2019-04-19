@@ -1,0 +1,15 @@
+__pycache__
+*.pyc 
+
+environment-profile.env
+team-profile.env
+custom-profile.env
+
+.DS_STORE
+.DS_STORE/
+.DS_STORE/*
+.idea
+nbproject
+
+.secret
+

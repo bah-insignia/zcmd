@@ -1,0 +1,15 @@
+PURPOSE
+-------
+Kill all the running containers by calling stop and then the remove command
+for each.
+
+SYNTAX
+------
+zcmd kill-all-containers
+
+NOTE
+----
+This runs the following two commands on EVERY running container ...
+    
+    docker container stop CONTAINERNAME
+    docker container rm CONTAINERNAME

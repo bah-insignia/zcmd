@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Starting $0 ..."
+
+if [ -f ./stack.env ]; then
+    source ./stack.env
+fi
+
+VCHECK="$HOME/zcmd/devutils/zc-clear-staged-dumps.sh"
+eval $VCHECK
+

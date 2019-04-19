@@ -1,0 +1,16 @@
+PURPOSE
+-------
+Build a local image of the machine specified in the current folder.
+
+SYNTAX
+------
+zcmd build [TAGNAME]
+
+    TAGNAME = Optional, defaults to 'latest' if not specified.
+
+REQUIREMENTS
+------------
+Current folder has the following files
+
+    Dockerfile
+    machine.env

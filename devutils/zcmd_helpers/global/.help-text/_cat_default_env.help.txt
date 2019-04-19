@@ -1,0 +1,8 @@
+PURPOSE
+-------
+Output the contents of the default environment settings file
+
+SYNTAX
+------
+zcmd _cat_default_env
+

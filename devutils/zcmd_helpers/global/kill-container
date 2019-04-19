@@ -1,0 +1,78 @@
+#!/bin/bash
+
+VERSIONINFO="20180808.1"
+echo "Started $0 v$VERSIONINFO"
+
+CONTAINERNAME=$1
+THELIST=$(docker container ls | awk '{print $NF}')
+
+if [ -z "$CONTAINERNAME" ]; then
+    CONTAINERNAME="--pick-from-list"
+fi
+
+function pickCONTAINERNAME()
+{
+
+    CONTAINERNAME=""
+    echo "LISTING CONTAINERS"
+    #eval $CMD
+
+    unset options i
+    i=0
+    for NAME in $(echo $THELIST); do
+      if [ ! "$NAME" = "NAMES" ]; then
+        options[i++]="$NAME"
+      fi
+    done
+    if [ $i -eq 0 ]; then
+        echo "No running containers found!"
+        return
+    fi
+
+    select OPT in "${options[@]}" "QUIT"; do
+      case $OPT in
+        *_*)
+          echo "CONTAINERNAME named $OPT selected ..."
+          echo
+          CONTAINERNAME="$OPT"
+          break
+          ;;
+        "QUIT")
+          echo "Exiting the script now!"
+          echo
+          CONTAINERNAME=""
+          break
+          ;;
+        *)
+          echo "This is not an option"
+          ;;
+      esac
+    done
+
+}
+
+if [ "--pick-from-list"="$CONTAINERNAME" ]; then
+    pickCONTAINERNAME
+    if [ -z "$CONTAINERNAME" ]; then
+        echo
+        echo "No selected container!"
+        exit
+        exit 1
+    fi
+fi
+
+echo
+echo "Will remove container called '$CONTAINERNAME' ..."
+echo "... stop"
+docker container stop $CONTAINERNAME
+echo "... rm"
+docker container rm $CONTAINERNAME
+echo
+
+echo "Removed ${CONTAINERNAME}? Running docker ps -a ..."
+docker ps -a
+
+echo "NOTE: To completely remove all stopped containers simply issue this command..."
+echo "      docker container prune"
+echo
+

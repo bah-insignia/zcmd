@@ -1,0 +1,13 @@
+PURPOSE
+-------
+Runs some diagnostic checks on the current stack folder content and the
+general configuration of the host machine.
+
+SYNTAX
+------
+zcmd check-config
+
+NOTE
+----
+The logic in this implementation is a bit dated, some of the warnings it 
+generates can safely be ignored.

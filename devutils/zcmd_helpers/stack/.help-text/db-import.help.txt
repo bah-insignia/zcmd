@@ -1,0 +1,42 @@
+PURPOSE
+-------
+Replace local drupal database with database backup from an S3 path 
+
+    /SHARED_S3_STAGING_BUCKET_NAME/database-dumps/drupal#
+
+SYNTAX
+------
+zcmd py-db-import [FLAGS] [SOURCE_ENVNAME] [SOURCE_FILENAME] 
+
+    FLAGS = Flags can appear at the beginning or the end.
+
+            --localcopy = Import from local filesystem instead of S3  
+            --keepzip = Keep the zip file on the filesystem
+
+    SOURCE_ENVNAME = Environment name of the source for the import 
+                     (this is the S3 subfolder home of the file)
+
+    SOURCE_FILENAME = The filename in S3 (or local filesystem)
+
+EXAMPLE USAGE
+-------------
+To get prompted download from S3 (will show you available options for each arg)
+
+    zcmd db-import
+
+To import a file that is already in the local filesystem (the x can be anything)
+
+    zcmd db-import x d8--FRANK-DEV--drupal8--2019-04-16--09-23.zip --localcopy
+
+To import a file from S3 (from S3 environment called 'FRANK-DEV')
+
+    zcmd db-import FRANK-DEV d8--FRANK-DEV--drupal8--2019-04-16--09-23.zip
+
+REQUIRED STACK ENVIRONMENT VARS
+-------------------------------
+Your "stack.env" must declare both of the following variables...
+
+    APP_PLATFORM_NAME (e.g., "drupal")
+    APP_PLATFORM_MAJOR_VERSION (e.g., 7 or 8)
+    WEB_HOST_SHARED_TMP_PATH        webserver accessible host path
+    WEB_INTERNAL_SHARED_TMP_PATH    webserver accessible internal path

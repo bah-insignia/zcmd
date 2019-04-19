@@ -1,0 +1,20 @@
+PURPOSE
+-------
+Attempts create an Drupal admin user using drush.
+
+SYNTAX
+------
+zcmd drush-create-administrator [USERNAME] [USERPASSWORD]
+
+    USERNAME     = Optional, defaults to'devadmin'
+    USERPASSWORD = Optional, defaults to 'apass2018'
+
+REQUIREMENTS
+------------
+The webserver container must be running and must have drush installed.
+
+NOTE
+----
+This is a shortcut for the following command ...
+
+    zmcd drush user-create

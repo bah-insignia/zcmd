@@ -1,0 +1,17 @@
+PURPOSE
+-------
+List all local cache image entries for PUBLIC_IMAGE_NAME and all the 
+tags for PUBLIC_IMAGE_NAME in our private docker registry/repo.
+
+SYNTAX
+------
+zcmd listtags
+
+NOTE
+----
+Executes the following commands ...
+
+    docker image ls | grep ${PUBLIC_IMAGE_NAME}
+    curl -X GET ${PRIVATE_DOCKER_FULL_REGISTRY_URL}/v2/${PUBLIC_IMAGE_NAME}/tags/list
+
+The PUBLIC_IMAGE_NAME value is copied from the local machine.env file.

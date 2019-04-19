@@ -1,0 +1,10 @@
+PURPOSE
+-------
+Open an interactive terminal into a running container.
+
+SYNTAX
+------
+zcmd container-terminal [CONTAINER_NAME] [USERNAME]
+
+    CONTAINER_NAME = Optional, lists all running containers if invalid or none specified.
+    USERNAME       = Optional, uses the container runtime default if none specified.

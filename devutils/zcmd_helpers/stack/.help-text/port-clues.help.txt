@@ -1,0 +1,8 @@
+PURPOSE
+-------
+Show us clues to what the port number of our stack might be.
+The clues come from listing contents of key configuration files.
+
+SYNTAX
+------
+zcmd port-clues

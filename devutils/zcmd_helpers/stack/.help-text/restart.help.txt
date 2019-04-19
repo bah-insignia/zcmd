@@ -1,0 +1,12 @@
+PURPOSE
+-------
+Shut down and then fire up the docker stack defined by the current directory.
+
+SYNTAX
+------
+zcmd restart
+
+NOTE
+----
+The restart is implemented as a zcmd down followed by a zcmd up with some
+message text in the middle.

@@ -1,0 +1,15 @@
+PURPOSE
+-------
+Issue a docker restart on a container.
+
+SYNTAX
+------
+zcmd container-restart [CONTAINERNAME]
+
+    CONTAINERNAME = Optional, provides pick list if none is specified.
+
+NOTE
+----
+Equivalent of the following command ...
+
+    docker container restart CONTAINERNAME

@@ -1,0 +1,21 @@
+PURPOSE
+-------
+Kill the specified container by calling stop and then the remove command.
+
+SYNTAX
+------
+zcmd kill-container [--pick-from-list] | CONTAINERNAME
+
+    --pick-from-list = Triggers display of a pick list where you see all
+                       running container names can pick one to kill.
+    
+    Alternative input ...
+
+    CONTAINERNAME=Name or ID of the container to kill
+
+NOTE
+----
+This runs the following two commands on the selected container ...
+    
+    docker container stop CONTAINERNAME
+    docker container rm CONTAINERNAME

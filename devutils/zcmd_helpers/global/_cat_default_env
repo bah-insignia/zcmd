@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ ! -z "$ZCMD_HOME" ]; then
+    cat $ZCMD_HOME/devutils/default-docker-env.txt
+else
+    cat $HOME/zcmd/devutils/default-docker-env.txt
+fi

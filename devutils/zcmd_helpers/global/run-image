@@ -1,0 +1,46 @@
+#!/bin/bash
+IMAGENAME=$1
+CONTAINERNAME=$2
+MAP_PORT_EXT=$3
+MAP_PORT_INT=$4
+
+
+THEIMAGELIST=$(docker image ls)
+THECONTAINERLIST=$(docker container ls | awk '{print $NF}')
+
+function showUsage()
+{
+    echo "USAGE: run-image IMAGENAME [CONTAINERNAME [MAP_PORT_EXT MAP_PORT_INT]]"
+}
+
+if [ -z "$IMAGENAME" ]; then
+    echo "No IMAGE NAME provided!"
+    echo
+    echo "LIST OF EXISTING LOCAL IMAGES ..."
+    echo "$THEIMAGELIST"
+    echo
+    echo "Must provide a valid image name!"
+    echo
+    showUsage
+    exit 1
+fi
+if [ -z "$CONTAINERNAME" ]; then
+    CONTAINERNAME=$IMAGENAME
+fi
+
+if [ -z "$MAP_PORT_EXT" ]; then
+    docker run --name $CONTAINERNAME -d -t ${IMAGENAME}
+    docker exec -ti --user=root $CONTAINERNAME /bin/sh
+else
+    if [ -z "${MAP_PORT_INT}" ]; then
+        echo "Mapping port ${MAP_PORT_EXT} to ${MAP_PORT_EXT}"
+        docker run --name $CONTAINERNAME -d -p ${MAP_PORT_EXT}:${MAP_PORT_EXT} -t ${IMAGENAME}
+    else
+        echo "Mapping port ${MAP_PORT_EXT} to ${MAP_PORT_INT}"
+        docker run --name $CONTAINERNAME -d -p ${MAP_PORT_EXT}:${MAP_PORT_INT} -t ${IMAGENAME}
+    fi
+    docker exec -ti --user=root $CONTAINERNAME /bin/sh
+fi
+
+
+

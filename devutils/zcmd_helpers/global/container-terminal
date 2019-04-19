@@ -1,0 +1,126 @@
+#!/bin/bash
+VERSIONINFO=20181129.1
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+
+BASENAME=$(basename $0)
+echo "SCRIPT PURPOSE: Open a command-line terminal into a running docker container"
+echo "SYNTAX: zcmd $BASENAME [CONTAINER_NAME] [USERNAME]"
+echo
+
+THELIST=$(docker container ls | awk '{print $NF}')
+
+ORIGINALARGVALUE=$1
+CONTAINERNAME=$1
+if [ ! -z "$CONTAINERNAME" ]; then
+
+    FOUNDIT=""
+    for NAME in $(docker container ls | awk '{print $NF}'); do
+      if [ "$NAME" = "$CONTAINERNAME" ]; then
+        FOUNDIT="$CONTAINERNAME"
+        break
+      fi
+    done
+
+    if [ -z "$FOUNDIT" ]; then
+        #NOT a valid container name!
+        echo "$CONTAINERNAME is NOT a valid container name"
+    else
+        echo "$CONTAINERNAME container found"
+    fi
+
+    CONTAINERNAME="$FOUNDIT"
+fi
+
+USERNAME=$2
+if [ -z "$USERNAME" ]; then
+    if [ ! -z "$TERMINAL_USERNAME" ]; then
+        USERNAME="$TERMINAL_USERNAME"
+    else
+        USERNAME="DEFAULT"
+    fi
+fi
+
+echo
+echo "INPUT: $0 $1 $2"
+if [ -z "$ORIGINALARGVALUE" ]; then 
+    echo "  CONTAINERNAME = MISSING"
+else
+    echo "  CONTAINERNAME = $ORIGINALARGVALUE"
+fi
+echo "  USERNAME      = $USERNAME"
+echo
+
+function pickContainer()
+{
+    unset options i
+    i=0
+    for NAME in $(docker container ls | awk '{print $NF}'); do
+      if [ ! "$NAME" = "NAMES" ]; then
+        options[i++]="$NAME"
+      fi
+    done
+
+    select OPT in "${options[@]}" "QUIT"; do
+      case $OPT in
+        *_*)
+          echo "Container named $OPT selected ..."
+          echo
+          CONTAINERNAME="$OPT"
+          break
+          ;;
+        "QUIT")
+          echo "Exiting the script now!"
+          echo
+          CONTAINERNAME=""
+          break
+          ;;
+        *)
+          echo "This is not an option"
+          ;;
+      esac
+    done
+}
+
+if [ -z "$CONTAINERNAME" ]; then
+    
+    echo "Missing a valid container name!"
+    echo "PICK A CONTAINER ..."
+
+    pickContainer
+
+    #echo "$THELIST"
+
+    #echo
+    #echo "Must provide a container name!"
+    if [ -z "$CONTAINERNAME" ]; then
+        exit 1
+    fi
+fi
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+#lib_isRuntimeStackFolder
+#if [ $? -ne 0 ]; then
+#    echo "ERROR: The command must be invoked from a valid stack context folder."
+#    exit 2
+#fi
+
+ZCMD_LAUNCHDIR=$(pwd)
+if [ -f ./stack.env ]; then
+    #We have a stack environment, load it to get the defaults
+    source ./stack.env
+fi
+
+if [ "DEFAULT" = "$USERNAME" ]; then
+    echo "CONTAINER CONTEXT: Opening terminal to $CONTAINERNAME as DEFAULT USER ..."
+    USERARG=""
+else
+    echo "CONTAINER CONTEXT: Opening terminal to $CONTAINERNAME as USER=$USERNAME ..."
+    USERARG=" --user=${USERNAME}"
+fi
+
+echo docker exec -ti ${USERARG} ${CONTAINERNAME} /bin/bash
+docker exec -ti ${USERARG} ${CONTAINERNAME} /bin/bash
+

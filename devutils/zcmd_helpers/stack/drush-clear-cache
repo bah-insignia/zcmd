@@ -1,0 +1,23 @@
+#!/bin/bash
+
+VERSIONINFO="20180801.1"
+echo "Started $0 v$VERSIONINFO"
+
+echo
+echo "This command will attempt to clear the drupal cache of the running webserver"
+if [ ! "$1" = "" ]; then
+    echo
+    echo "Call this WITHOUT arguments!  Arguments ignored!"
+    echo
+fi
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+CMD="zcmd drush cc all"
+echo $CMD
+eval "$CMD"
+
+echo
+echo "Finished $0"
+echo

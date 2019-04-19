@@ -1,0 +1,14 @@
+PURPOSE
+-------
+List all the images and their tags from our shared private docker registry/repo.
+
+SYNTAX
+------
+zcmd listimages
+
+NOTE
+----
+Executes the following commands ...
+
+    curl -X GET ${PRIVATE_DOCKER_FULL_REGISTRY_URL}/v2/_catalog
+    curl -X GET ${PRIVATE_DOCKER_FULL_REGISTRY_URL}/v2/$PUBLIC_IMAGE_NAME/tags/list

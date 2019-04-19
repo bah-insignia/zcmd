@@ -1,0 +1,90 @@
+# VALUES IN THIS FILE HAVE GLOBAL EFFECT
+# These are the ENVIRONMENT settings intended
+# as default values for reference from
+# the "Dockerfile" and "docker-compose.yml" files.
+
+ALLOW_SHOW_INFO=$1
+if [ ! "YES" = "$ALLOW_SHOW_INFO" ]; then
+    #Important to NOT echo in some cases so default to this!
+    ALLOW_SHOW_INFO="NO"
+fi
+
+DEFAULT_ENV_VERSIONINFO="20190415.1"
+
+SCRIPTDIR=$( dirname "$0" )
+PARENTDIR="$(cd ${SCRIPTDIR}/.. && pwd)"
+TIMESTAMP=$(date +"%Y_%m_%d")
+
+#Declare our preferred default container terminal user
+TERMINAL_USERNAME="web.mgmt"
+
+CUSTOM_ENVPROFILE="${ZCMD_HOME}/custom-profile.env"
+TEAM_ENVPROFILE="${ZCMD_HOME}/team-profile.env"
+
+#Local filesystem locations
+LOCAL_DUMPS_ROOTDIR="/usr/local/share/zcmd"
+LOCAL_DBDUMPS_FILEDIR="$LOCAL_DUMPS_ROOTDIR/database-dumps"
+LOCAL_VOLUMEDUMPS_FILEDIR="$LOCAL_DUMPS_ROOTDIR/volume-dumps"
+LOCAL_CONFIGDUMPS_FILEDIR="$LOCAL_DUMPS_ROOTDIR/config-dumps"
+LOCAL_ASSETDUMPS_FILEDIR="$LOCAL_DUMPS_ROOTDIR/asset-dumps"
+
+#Folder locations we use in S3
+S3_DUMPS_ROOTDIR=""
+S3_DBDUMPS_FILEDIR="database-dumps"
+S3_VOLUMEDUMPS_FILEDIR="volume-dumps"
+S3_ASSETDUMPS_FILEDIR="asset-data-dumps"
+
+#Comma delimited list of images we maintain that we want to regularly pull
+GLOBAL_CORE_CUSTOM_IMAGE_LIST=""
+
+#TODO move to plugin
+DEFAULT_DRUPAL_ASSET_PATH="/sites/default/files"
+
+#ADMIN MAPPINGS
+CUSTOM_ADMIN_STACK_PATH=""
+
+#######################################################################
+# IMPORTANT: We load the local server environment override files LAST #
+#######################################################################
+
+ALLOW_SHOW_INFO="NO"
+if [ -f "${TEAM_ENVPROFILE}" ]; then
+    if [ "YES" = "$ALLOW_SHOW_INFO" ]; then
+        echo "LOADING ${TEAM_ENVPROFILE}"
+    fi
+    source ${TEAM_ENVPROFILE}
+fi
+    
+if [ "YES" = "$ALLOW_SHOW_INFO" ]; then
+    echo "LOADING ${CUSTOM_ENVPROFILE}"
+fi
+source ${CUSTOM_ENVPROFILE}
+
+if [ -z "$ENVIRONMENT_NAME" ]; then
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "WARNING: Missing or incomplete $CUSTOM_ENVPROFILE"
+    #echo "SCRIPT=$0"
+    #echo "SCRIPTDIR=$SCRIPTDIR"
+    #echo "PARENTDIR=${PARENTDIR}"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo
+else
+    TIMESTAMP=$(date +"%Y_%m_%d__%H_%M_%S")
+    #ALLOW ONLY IF NOT LOADED BY A "JUST_GET..." SCRIPT!!!!!!!!!!!!!
+    if [ "YES" = "$ALLOW_SHOW_INFO" ]; then
+        if [ ! "$TIMESTAMP" = "$ZCMD_ENV_TIMESTAMP" ]; then
+            echo "... ZCMD_TEAM_ENV_VERSIONINFO   = $ZCMD_TEAM_ENV_VERSIONINFO"
+            echo "... ZCMD_CUSTOM_ENV_VERSIONINFO = $ZCMD_CUSTOM_ENV_VERSIONINFO"
+            echo "... IS_PRODUCTION                 = $IS_PRODUCTION"
+            echo "... ENVIRONMENT_NAME              = $ENVIRONMENT_NAME"
+            echo "... AUTHORIZED_USERNAME           = $AUTHORIZED_USERNAME"
+            echo "... ENVIRONMENT LOADED TIMESTAMP  = $TIMESTAMP"
+            echo "... PRIVATE_DOCKER_FULL_REGISTRY_URL  = $PRIVATE_DOCKER_FULL_REGISTRY_URL"
+            if [ ! -z "$ZCMD_ENV_TIMESTAMP" ]; then
+                echo "...... PREVIOUS ENV TIMESTAMP     = $ZCMD_ENV_TIMESTAMP"
+            fi
+        fi
+        echo
+    fi
+    export ZCMD_ENV_TIMESTAMP=$TIMESTAMP
+fi

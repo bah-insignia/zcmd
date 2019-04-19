@@ -1,0 +1,13 @@
+PURPOSE
+-------
+Show the list of existing docker containers
+
+SYNTAX
+------
+zcmd psa
+
+NOTE
+----
+Equivalent of typing the following ...
+
+    docker ps -a

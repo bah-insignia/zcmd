@@ -1,0 +1,95 @@
+#!/bin/bash
+
+VERSIONINFO="20180514.1"
+echo "Started $0 v$VERSIONINFO"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+#($HOME/zcmd/devutils/zc-check-is-stack-folder.sh)
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+echo
+echo "USAGE: zcmd drush-create-administrator [USERNAME] [USERPASSWORD]"
+
+DOPAUSE="NO"
+if [ -z "$1" ]; then
+    if [ ! "NO" = "$IS_PRODUCTION" ]; then
+        echo "ERROR: USERNAME MUST be provided when running in production!"
+        exit 2
+    fi
+    USERNAME="devadmin"
+    DOPAUSE="YES"
+else
+    USERNAME="$1"
+fi
+
+if [ -z "$2" ]; then
+    if [ ! "NO" = "$IS_PRODUCTION" ]; then
+        echo "ERROR: USERPASSWORD MUST be provided when running in production!"
+        exit 2
+    fi
+    USERPASSWORD="apass2018"
+    DOPAUSE="YES"
+else
+    USERPASSWORD="$2"
+fi
+
+if [ ! "NO" = "$IS_PRODUCTION" ]; then
+    DOPAUSE="YES"
+fi
+
+echo
+echo "WILL CREATE ADMIN USER using DRUSH commands"
+echo "... USERNAME     = $USERNAME"
+echo "... USERPASSWORD = $USERPASSWORD"
+echo
+
+if [ "YES" = "$DOPAUSE" ]; then
+    echo "Press CTRL-C now to abort; else press ENTER key to continue"
+    read
+    echo
+fi
+
+OUR_ERRORS=""
+
+CMD="zcmd drush user-create $USERNAME --mail="${USERNAME}@unreal.localhost" --password=$USERPASSWORD"
+echo $CMD
+eval "$CMD"
+if [ $? -ne 0 ]; then
+    OUR_ERRORS="$OUR_ERRORS CREATE_USER"
+fi
+
+CMD="zcmd drush user-add-role "administrator" --name=$USERNAME"
+echo $CMD
+eval "$CMD"
+if [ $? -ne 0 ]; then
+    OUR_ERRORS="$OUR_ERRORS ADD_ROLE"
+fi
+
+CMD="zcmd drush cc all"
+echo $CMD
+eval "$CMD"
+if [ $? -ne 0 ]; then
+    OUR_ERRORS="$OUR_ERRORS CLEAR_CACHE"
+fi
+echo
+echo "Try login at YOURSITEROOT/user URL with following credentials ..."
+echo "    USERNAME     = $USERNAME"
+echo "    USERPASSWORD = $USERPASSWORD"
+echo
+if [ ! -z "$OUR_ERRORS" ]; then
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "DETECTED ERROR(S): $OUR_ERRORS"
+    echo "DEBUGGING TIP: If this does not work, look for error messages above."
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo
+fi
+
+

@@ -1,0 +1,150 @@
+#!/bin/bash
+
+VERSIONINFO="20180801.1"
+echo "Started $0 v$VERSIONINFO"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+
+ZCMD_LAUNCHDIR=$(pwd)
+STACK_ENV_FILE=./stack.env
+source $STACK_ENV_FILE
+
+CMD_CHECK_CONFIG="zcmd check-config"
+
+SELECTEDTESTFOLDER=$1
+SINGLETEST=$2
+
+TESTS_ROOT_FOLDERNAME="tests"
+TESTS_EXAMPLES_FOLDERNAME="${TESTS_ROOT_FOLDERNAME}/examples"
+TESTS_REPO_FOLDERNAME="${TESTS_ROOT_FOLDERNAME}/repo"
+
+
+function showAvailableTests()
+{
+    local FOUNDTESTS="NO"
+    if [ -d "$TESTS_EXAMPLES_FOLDERNAME" ]; then
+        echo
+        echo "Available Example Tests ..."
+        CMD="ls $TESTS_EXAMPLES_FOLDERNAME"
+        echo $CMD
+        LIST=$(eval $CMD)
+        if [ -z "$LIST" ]; then
+            echo " --- NONE ---"
+        else
+            FOUNDTESTS="YES"
+            echo $LIST
+        fi
+    fi
+    if [ -d "$TESTS_REPO_FOLDERNAME" ]; then
+        echo
+        echo "Available Repo Tests ..."
+        CMD="ls $TESTS_REPO_FOLDERNAME"
+        echo $CMD
+        LIST=$(eval $CMD)
+        if [ -z "$LIST" ]; then
+            echo " --- NONE ---"
+        else
+            FOUNDTESTS="YES"
+            echo $LIST
+        fi
+    fi
+    if [ "NO" = "$FOUNDTESTS" ]; then
+        echo
+        echo "NOTE: No local tests defined for current stack."
+        echo "      Tests would be in the 'tests' subdirectory.'
+        echo
+    fi
+}
+
+function showUsage
+{
+    echo
+    SCRIPTNAME=$(basename "$0")
+    echo "USAGE: zcmd $SCRIPTNAME TESTFOLDER [SINGLETESTFILE]"
+    echo "   TESTFOLDER = path to the folder containing the selenium tests"
+    echo "   SINGLETESTFILE = optional single filename from the folder"
+    echo
+    showAvailableTests
+    echo
+}
+
+
+if [ -z "$SELECTEDTESTFOLDER" ]; then
+    echo
+    showUsage
+    exit 1
+fi
+
+echo    
+if [ ! -z "$SINGLETEST" ]; then
+    echo ">>> SELECTED SINGLE TEST = $SELECTEDTESTFOLDER/$SINGLETEST"
+else
+    echo ">>> SELECTED TEST FOLDER = $SELECTEDTESTFOLDER"
+fi
+echo
+
+FOUNDCONTEXT=""
+FULLFOLDERPATH="${SELECTEDTESTFOLDER}"
+if [ -d "$FULLFOLDERPATH" ]; then
+    FOUNDCONTEXT="DIRECT"
+    echo ">>> $FOUNDCONTEXT test folder found at $FULLFOLDERPATH"
+fi
+if [ -z "$FOUNDCONTEXT" ]; then
+    FULLFOLDERPATH="tests/repo/${SELECTEDTESTFOLDER}"
+    echo "checking $FULLFOLDERPATH"
+    if [ -d "$FULLFOLDERPATH" ]; then
+        FOUNDCONTEXT="REPO"
+        echo ">>> $FOUNDCONTEXT test folder found at $FULLFOLDERPATH"
+    fi
+fi
+if [ -z "$FOUNDCONTEXT" ]; then
+    FULLFOLDERPATH="tests/examples/${SELECTEDTESTFOLDER}"
+    echo "checking $FULLFOLDERPATH"
+    if [ -d "$FULLFOLDERPATH" ]; then
+        FOUNDCONTEXT="EXAMPLES"
+        echo ">>> $FOUNDCONTEXT test folder found at $FULLFOLDERPATH"
+    fi
+fi
+if [ -z "$FOUNDCONTEXT" ]; then
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "Failed to find any tests folder called ${SELECTEDTESTFOLDER}"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    showUsage
+    exit 2
+fi
+
+CLEANFOLDERPATH=$(cd $FULLFOLDERPATH && pwd)
+echo "Found tests at $CLEANFOLDERPATH"
+
+TARGETTYPE=""
+if [ ! -z "$SINGLETEST" ]; then
+    TARGETTYPE="FILE"
+    CLEANFULLPATH="$CLEANFOLDERPATH/$SINGLETEST"
+    if [ ! -f "CLEANFULLPATH" ]; then
+        echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        echo "Failed to find $SINGLETEST in $CLEANFOLDERPATH"
+        echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        echo "Contents of $CLEANFOLDERPATH..."
+        ls $CLEANFOLDERPATH
+        showUsage
+        exit 2
+    fi
+else
+    TARGETTYPE="FOLDER"
+    CLEANFULLPATH="$CLEANFOLDERPATH"
+fi
+
+echo "TODO --- NOW RUN THE TESTS"
+
+echo "LOOK $(pwd)"
+
+echo
+echo "############################################################################"
+echo "TEST SCRIPT IS DONE!"

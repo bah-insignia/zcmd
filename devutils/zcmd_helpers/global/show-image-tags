@@ -1,0 +1,10 @@
+#!/bin/bash
+
+IMAGENAME=$1
+if [ -z "$IMAGENAME" ]; then
+    echo "MISSING required IMAGENAME!"
+    exit 2
+fi
+
+$HOME/zcmd/devutils/zc-list-remote-image-tags.sh $IMAGENAME
+

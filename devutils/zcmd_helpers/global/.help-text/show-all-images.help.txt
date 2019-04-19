@@ -1,0 +1,13 @@
+PURPOSE
+-------
+Show all the LOCAL and SHARED images.
+
+SYNTAX
+------
+zcmd show-all-images
+
+REQUIREMENTS
+------------
+The local listing only requires that docker be installed, the shared
+listing requires a working properly configured connection to the private
+registry/repo of our shared images.

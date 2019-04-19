@@ -1,0 +1,22 @@
+PURPOSE
+-------
+Creates a container from the image defined in the current folder.
+
+SYNTAX
+------
+zcmd create [CONTAINERNAME] [TAG]
+
+    CONTAINERNAME = Optional, defaults to ${LOCAL_IMAGE_NAME} from machine.env
+    TAG = Optional, defaults to 'latest'.
+
+NOTE
+----
+Executes the following command ...
+
+    docker create -ti --name ${CONTAINERNAME} ${FQ_CONTAINER_IMAGENAME}
+
+    CONTAINERNAME = The name to give the container we are going to create 
+    FQ_CONTAINER_IMAGENAME = The fully qualified image name for the container
+
+                             local/${LOCAL_IMAGE_NAME}:${TAGNAME}
+    

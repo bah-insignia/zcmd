@@ -1,0 +1,60 @@
+#!/bin/bash
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+
+function showPurpose()
+{
+    echo
+    echo "STAGING AREA PURPOSE"
+    echo "The staging area is used as a cache for installing images and other container"
+    echo "content.  Feel free to clear this cache if you want to pull new copies from"
+    echo "the remote sources."
+    echo
+}
+    
+function showLocalStagingAreas()
+{
+    echo
+    echo "### LISTING START ##################################################################"
+    echo "Contents of $LOCAL_DBDUMPS_FILEDIR"
+    if [ ! -d "$LOCAL_DBDUMPS_FILEDIR" ]; then
+        echo "-- Missing $LOCAL_DBDUMPS_FILEDIR"
+    else
+        ls -rl "$LOCAL_DBDUMPS_FILEDIR"
+    fi
+
+    echo
+    echo "Contents of $LOCAL_VOLUMEDUMPS_FILEDIR"
+    if [ ! -d "$LOCAL_VOLUMEDUMPS_FILEDIR" ]; then
+        echo "-- Missing $LOCAL_VOLUMEDUMPS_FILEDIR"
+    else
+        ls -rl "$LOCAL_VOLUMEDUMPS_FILEDIR"
+    fi
+
+    echo
+    echo "Contents of $LOCAL_CONFIGDUMPS_FILEDIR"
+    if [ ! -d "$LOCAL_CONFIGDUMPS_FILEDIR" ]; then
+        echo "-- Missing $LOCAL_CONFIGDUMPS_FILEDIR"
+    else
+        ls -rl "$LOCAL_CONFIGDUMPS_FILEDIR"
+    fi
+
+    echo
+    echo "Contents of $LOCAL_ASSETDUMPS_FILEDIR"
+    if [ ! -d "$LOCAL_ASSETDUMPS_FILEDIR" ]; then
+        echo "-- Missing $LOCAL_ASSETDUMPS_FILEDIR"
+    else
+        ls -rl "$LOCAL_ASSETDUMPS_FILEDIR"
+    fi
+    echo "### LISTING DONE ##################################################################"
+    echo
+
+}
+
+showPurpose
+showLocalStagingAreas
+
+exit 0
+
+
+

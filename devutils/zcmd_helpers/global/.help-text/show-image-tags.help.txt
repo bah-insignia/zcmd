@@ -1,0 +1,13 @@
+PURPOSE
+-------
+Show all tags of an image in our registry
+
+SYNTAX
+------
+zcmd show-image-tags [IMAGE_NAME]
+
+    IMAGE_NAME = Required name of the image we want to check
+
+TIP
+---
+The available image names can be listed using the zcmd show-all-images command

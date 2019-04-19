@@ -1,0 +1,25 @@
+#!/bin/bash
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isMachineImageFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid machine context folder."
+    exit 2
+fi
+
+source machine.env
+
+if [ ! -z "$1" ]; then
+    CONTAINERNAME=$1
+else
+    CONTAINERNAME=${LOCAL_IMAGE_NAME}
+fi
+
+CMD="docker container stop $CONTAINERNAME"
+echo $CMD
+eval $CMD
+echo
+docker ps -a
+echo

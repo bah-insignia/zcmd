@@ -1,0 +1,18 @@
+#To enable the zcmd autocompletion feature, place this file
+#with world-read rights into the following folder...
+#  /etc/bash_completion.d/
+_zcmd() 
+{
+	local cur prev opts
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+	opts=$(zcmd JUST_SHOW_OPTIONS)
+
+	#opts="--help --verbose --version"
+
+	COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+	return 0
+}
+complete -F _zcmd zcmd

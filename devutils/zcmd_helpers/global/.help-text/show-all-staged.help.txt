@@ -1,0 +1,12 @@
+PURPOSE
+-------
+Show all files that zcmd may have temporarily staged.  Current locations are ...
+
+ /usr/local/share/zcmd/database-dumps
+ /usr/local/share/zcmd/volume-dumps
+ /usr/local/share/zcmd/config-dumps
+ /usr/local/share/zcmd/asset-dumps
+
+SYNTAX
+------
+zcmd show-all-staged

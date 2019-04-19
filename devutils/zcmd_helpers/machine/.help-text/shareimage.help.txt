@@ -1,0 +1,12 @@
+PURPOSE
+-------
+Push the local image into our shared docker registry/repo
+
+SYNTAX
+------
+zcmd shareimage [TAGNAME]
+
+Where ...
+
+    TAGNAME = Optional tagname to associate with the shared image.  
+              If no tagname value is provided then 'latest' is assumed.

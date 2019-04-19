@@ -1,0 +1,21 @@
+PURPOSE
+-------
+Export local drupal database to the S3 path as a ZIP file
+
+    /SHARED_S3_STAGING_BUCKET_NAME/database-dumps/drupal8/[ENVNAME]/[FILENAME]
+
+SYNTAX
+------
+zcmd db-export [--localcopy] [--nos3]
+
+REQUIRED STACK ENVIRONMENT VARS
+-------------------------------
+Your "stack.env" must declare both of the following variables...
+
+    APP_PLATFORM_NAME (e.g., "drupal")
+    APP_PLATFORM_MAJOR_VERSION (e.g., 7 or 8)
+
+NOTES ABOUT FILE PLACED INTO S3
+-------------------------------
+The ENVNAME comes from your local "custom-profile.env" settings.
+The FILENAME is constructed such that it incorporates a date and time.

@@ -1,0 +1,24 @@
+PURPOSE
+-------
+Run available selenium tests that are defined for the current stack in
+the 'tests' subdirectory.
+
+SYNTAX
+------
+zcmd run-tests TESTFOLDER [SINGLETESTFILE]
+
+   TESTFOLDER     = Required, name of folder containing the selenium test files
+   SINGLETESTFILE = Optional, single filename from the folder
+
+NOTE
+----
+The TESTFOLDER is searched for in this order ...
+
+    1) tests/repos/TESTFOLDER
+    2) tests/examples/TESTFOLDER
+
+If found at location 1, then tests run from location 1; otherwise looks for
+the selenium tests in location 2.  If the named TESTFOLDER is not found in
+either location an error is reported and all available folder names are listed.
+
+

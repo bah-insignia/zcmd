@@ -1,0 +1,8 @@
+PURPOSE
+-------
+Show the 'zcmd' environment values available to a launched python script.
+
+SYNTAX
+------
+zcmd py-envcheck
+

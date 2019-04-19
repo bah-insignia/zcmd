@@ -1,0 +1,40 @@
+#!/bin/bash
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isMachineImageFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid machine context folder."
+    exit 2
+fi
+
+WHICHJQ=$(which jq)
+if [ -z "$WHICHJQ" ]; then
+    HASJQ="NO"
+    JQPART=""
+else
+    HASJQ="YES"
+    JQPART=" | jq"
+fi
+
+source machine.env
+
+echo
+echo "Listing of all images in our private catalog ..."
+CMD="curl -X GET ${PRIVATE_DOCKER_FULL_REGISTRY_URL}/v2/_catalog --insecure $JQPART"
+echo $CMD
+eval $CMD
+
+echo
+
+echo "Listing of all TAGS for image of '$PUBLIC_IMAGE_NAME' ..."
+CMD="curl -X GET ${PRIVATE_DOCKER_FULL_REGISTRY_URL}/v2/$PUBLIC_IMAGE_NAME/tags/list --insecure $JQPART"
+echo $CMD
+eval $CMD
+echo
+
+
+
+
+

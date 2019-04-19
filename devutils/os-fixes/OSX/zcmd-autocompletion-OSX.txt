@@ -1,0 +1,13 @@
+Open terminal window then
+
+    brew install bash-completion
+
+Add the following line to your ~/.bash_profile:
+
+  [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
+
+Then from the linux/env-setup/dev folder, run this ...
+
+    cp -a zcmd-completion /usr/local/etc/bash_completion
+
+ 

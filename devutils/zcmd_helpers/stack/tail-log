@@ -1,0 +1,67 @@
+#!/bin/bash
+
+VERSIONINFO="20181127.2"
+echo "Started $0 v$VERSIONINFO"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+#($HOME/zcmd/devutils/zc-check-is-stack-folder.sh)
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    echo
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+NUM=$1
+THECONTAINERNAME="$CONTAINER_NAME_WEB"
+if [ -z "$THECONTAINERNAME" ]; then
+    THECONTAINERNAME="$WEB_CONTAINERNAME"
+    if [ ! -z "$THECONTAINERNAME" ]; then
+        echo
+        echo "NOTE: Consider changing to CONTAINER_NAME_WEB instead of WEB_CONTAINERNAME in stack.env"
+        echo
+    else
+        echo "Did not find CONTAINER_NAME_WEB declaration; will attempt to guess at web container name for stack."
+        if [ -z "$PROJECT_NAME" ]; then
+            echo "Missing required PROJECT_NAME declaration for this stack!"
+            exit 2
+        fi
+
+        #Take a stab at what the name should be
+        THECONTAINERNAME="stack_webserver_${PROJECT_NAME}"
+
+        echo "Guessing container name would be $THECONTAINERNAME"
+    fi
+fi
+
+#Allow for Docker to screw up the declared container name with a serial number suffix
+RUNTIME_CONTAINERNAME=$(docker ps | awk '{if(NR>1) print $NF}' | grep $THECONTAINERNAME)
+if [ ! -z "$RUNTIME_CONTAINERNAME" ]; then
+    echo "FOUND runtime container $RUNTIME_CONTAINERNAME"
+else
+    echo
+    echo "ERROR: Did not find container named '${THECONTAINERNAME}'!"
+    echo "Is your stack running?"
+    echo
+    zcmd psa
+    exit 2
+fi	
+
+THEFILE="$WEB_INTERNAL_PATH_ERROR_LOG"
+if [ -z "$THEFILE" ]; then
+    #Assume the default path to the error log file
+    THEFILE="/var/log/apache2/error.log"
+fi
+
+if [ -z "$NUM" ]; then
+    echo "TAIL is following $THEFILE in $RUNTIME_CONTAINERNAME"
+    docker exec $RUNTIME_CONTAINERNAME bash -c "tail -f $THEFILE"
+else
+    echo "TAIL only last $NUM lines of $THEFILE in $RUNTIME_CONTAINERNAME"
+    docker exec $RUNTIME_CONTAINERNAME bash -c "tail -n $NUM $THEFILE"
+fi

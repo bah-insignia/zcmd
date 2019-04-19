@@ -1,0 +1,13 @@
+#!/bin/bash
+
+
+echo
+echo "========================================================================"
+echo "LOCALLY STAGED IMAGES...."
+docker image ls
+echo "========================================================================"
+echo
+
+$HOME/zcmd/devutils/zc-list-repo-images.sh
+
+

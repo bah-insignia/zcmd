@@ -1,0 +1,12 @@
+PURPOSE
+-------
+Open an interactive terminal into a running docker container.
+
+SYNTAX
+------
+zcmd ct [CONTAINER_NAME] [USERNAME] [CMD_OVERRIDE]
+
+    CONTAINER_NAME = Optional, lists all running containers if invalid or none specified.
+    USERNAME       = Optional, uses the container runtime default if none specified.
+    CMD_OVERRIDE   = Optional, the command to run in the container.  
+                     Normally executes sh or /bin/bash to present a terminal prompt.

@@ -1,0 +1,36 @@
+#!/bin/bash
+ACTION="down"
+
+VERSIONINFO="20180606.1"
+echo "Started $0 v$VERSIONINFO"
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+#($HOME/zcmd/devutils/zc-check-is-stack-folder.sh)
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+(cd $(pwd) && $HOME/zcmd/devutils/zc-compose.sh $ACTION $1)
+
+#Stop PREREQUISITE_STACK_PATHS
+if [ ! -z "$PREREQUISITE_STACK_PATHS" ]; then
+    #TODO --- Allow for colon delimited paths!!!!
+    echo
+    echo "PREREQUISITE_STACK_PATHS=$PREREQUISITE_STACK_PATHS"
+    echo
+    (cd $PREREQUISITE_STACK_PATHS && zcmd down)
+    echo
+    #Small pause
+    sleep 2
+    echo "... Done stopping all prerequisite stacks"
+    echo
+fi
+
+
+

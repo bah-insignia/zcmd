@@ -1,0 +1,22 @@
+# The default Admin Stack functionality for ZCMD
+#
+# Updated 20190412.1
+
+version: "3.5"
+
+services:
+
+  #ZCMD looks for this stub to know the admin stack has already started
+  zcmd_stub:
+    image: alpine:latest
+    container_name: admin_zcmd_stub 
+    command: "tail -f /dev/null"
+    networks:
+      - webnet
+
+#Create networks that are always available to ZCMD managed containers
+networks:
+  webnet:
+    name: admin_webnet  
+    driver: bridge
+

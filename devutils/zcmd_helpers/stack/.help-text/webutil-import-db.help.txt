@@ -1,0 +1,41 @@
+PURPOSE
+-------
+* NOTE THIS ONE IS COMPATABLE WITH EXISTING WEBUTILS FORMAT *
+Replace local database with database backup from an S3 path 
+
+    /SHARED_S3_STAGING_BUCKET_NAME/database-dumps
+
+SYNTAX
+------
+zcmd import-db [--pick-from-list] | [RAWSUFFIX [PROJECTNAME]]
+
+    --pick-from-list = Triggers display of a pick list where you see all
+                       available database backups and can pick one to import.
+    
+    Alternative inputs ...
+
+    RAWSUFFIX = Tail portion of filename to to import 
+                (no project prefix and no file type suffix)
+    PROJECTNAME = Optional input to construct backup filename to find
+
+NOTE
+----
+The backup filename that is downloaded will match this scheme ...
+
+    PROJECTNAME-RAWSUFFIX.sql.gz
+
+EXAMPLE
+-------
+Pick from a list ...
+
+    zcmd import-db --pick-from-list
+
+To download and install "ehc-stage-html-2018_07_31.sql.gz" from an EHC stack
+folder, we would use this command ...
+
+    zcmd import-db stage-html-2018_07_31 
+
+    ... or redundantly, 
+
+    zcmd import-db stage-html-2018_07_31 ehc
+

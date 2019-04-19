@@ -1,0 +1,117 @@
+#!/bin/bash
+
+VERSIONINFO="20190222.2"
+echo "Started $0 v$VERSIONINFO"
+echo "USAGE: import-assets-subset RAWSUFFIX [PROJECTNAME]"
+echo
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+#($HOME/zcmd/devutils/zc-check-is-stack-folder.sh)
+lib_isRuntimeStackFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid stack context folder."
+    exit 2
+fi
+ZCMD_LAUNCHDIR=$(pwd)
+source ./stack.env
+
+RAWSUFFIX=$1
+if [ -z "$RAWSUFFIX" ]; then
+
+    RAWSUFFIX="--pick-from-list"
+
+fi
+if [ ! -z "$2" ]; then
+    echo "Using PROJECT_NAME as '$2' instead of '${PROJECT_NAME}'"
+    PROJECT_NAME="$2"
+else
+    if [ ! -z "$LEGACY_PROJECT_NAME" ]; then
+        PROJECT_NAME=$LEGACY_PROJECT_NAME
+        echo "Using standard LEGACY project name as prefix"
+    else
+        PROJECT_NAME=$PROJECT_NAME
+        echo "Using standard project name as prefix"
+    fi
+fi
+echo "  PROJECT_NAME=$PROJECT_NAME"
+
+function pickAssetDumpRAWSUFFIX()
+{
+    PROJPREFIX="${PROJECT_NAME}-assets-"
+    S3_URL="${SHARED_S3_ASSETS_BUCKET}"
+    GREP=" | grep 'database-dumps'"
+    PV=$(which pv)
+    if [ -z "$PV" ]; then
+        CMD="aws s3 ls ${S3_URL} | grep '$PROJPREFIX' | awk -F'$PROJPREFIX' '{print \$2}'"
+    else
+        CMD="aws s3 ls ${S3_URL} | pv | grep '$PROJPREFIX' | awk -F'$PROJPREFIX' '{print \$2}'"
+    fi
+    echo "LISTING AVAILABLE ASSET DUMPS SUFFIX OPTIONS: $CMD"
+    #eval $CMD
+
+    unset options i
+    i=0
+    for NAME in $(eval $CMD); do
+        CLEAN_NAME=${NAME%?}
+        if [ ! "$CLEAN_NAME" = "NAMES" ]; then
+            options[i++]="$CLEAN_NAME"
+        fi
+    done
+
+    select OPT in "${options[@]}" "QUIT"; do
+      case $OPT in
+        *-*)
+          echo "RAWSUFFIX named $OPT selected ..."
+          echo
+          RAWSUFFIX="$OPT"
+          break
+          ;;
+        "QUIT")
+          echo "Exiting the script now!"
+          echo
+          RAWSUFFIX=""
+          break
+          ;;
+        *)
+          echo "This is not an option"
+          ;;
+      esac
+    done
+
+}
+
+if [ "--pick-from-list" = "$RAWSUFFIX" ]; then
+
+    pickAssetDumpRAWSUFFIX
+
+    if [ -z "$RAWSUFFIX" ]; then
+        echo
+        echo "QUIT BECAUSE SUFFIX NAME PROVIDED!"
+        echo
+        exit 2
+    fi
+
+fi
+
+if [ ! -z "$WEB_DOCROOT_PATH" ]; then
+    #Do the new hotness way (bind baby!)
+    if [ -z "$WEB_DOCROOT_PATH" ]; then
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        echo "FATAL ERROR -- MISSING WEB_DOCROOT_PATH env var!!!"
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        exit 2
+    fi
+    $HOME/zcmd/devutils/zc-import-app-assets-subset-to-path.sh $PROJECT_NAME $WEB_DOCROOT_PATH $RAWSUFFIX
+else
+    echo "Missing WEB_DOCROOT_PATH variable declaration!" 
+    echo "Importing subset of assets to a volume is NOT supported by this command"
+    exit 2
+fi
+STATUS_CD=$?
+if [ $STATUS_CD -ne 0 ]; then
+    echo "FAILED $0 [CODE=$STATUS_CD]"
+    exit $STATUS_CD
+fi
+

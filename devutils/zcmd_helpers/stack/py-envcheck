@@ -1,0 +1,31 @@
+#!/bin/bash
+
+VERSIONINFO="20181227.1"
+echo "Started $0 v$VERSIONINFO"
+
+PYSCRIPT="showpyenv.py"
+
+echo
+echo "Launches python program to list all the zcmd environment stuff"
+echo
+echo "PYSCRIPT=$PYSCRIPT"
+echo
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+ZCMD_STACK_PATH=$(pwd)
+
+CMD="python3 $HOME/zcmd/devutils/zcmd_python/stack/$PYSCRIPT"
+echo $CMD
+
+OUTPUT=$(cd $(pwd) && $HOME/zcmd/devutils/zc-python-stack-launch.sh $PYSCRIPT $1 $2 $3 $4 $5)
+EC=$?
+echo $OUTPUT
+if [ $EC -ne 0 ]; then
+    echo "EXIT CODE NOT ZERO! VALUE=$EC"
+fi
+
+echo
+echo "Finished $0 with exit code $EC"
+echo

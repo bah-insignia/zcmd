@@ -1,0 +1,24 @@
+PURPOSE
+-------
+Attempts to execute drush commands in a webserver.
+
+NOTE: The drush command runs in the default working directory of the container
+      unless your stack.env file declares a path for DOCROOT_PATH variable.
+
+SYNTAX
+------
+zcmd drush [arguments]
+
+EXAMPLE
+-------
+Clear all cache (pre drupal 8) ...
+
+    zcmd drush cc all
+
+See drush version number ...
+
+    zcmd drush --version
+
+REQUIREMENTS
+------------
+The webserver container must be running and must have drush installed.
