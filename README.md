@@ -77,9 +77,11 @@ Tip: Edit the stack.env if you want to use a different port number.  More detail
 
 CORE UTILITIES IN THE FRAMEWORK
 ===============================
+The framework includes several user callable helper utilities, all located in the zcmd/devutils directory.
 
-##ZCMD Utility
-The main utility is invoked by typing **zcmd** at the command prompt of a properly configured host computer's terminal.  Some command examples ...
+ZCMD Utility
+------------
+The main utility of the framework is invoked by typing **zcmd** at the command prompt of a properly configured host computer's terminal.  Some command examples ...
 
  * zcmd up <-- Starts a stack
  * zcmd psa <-- Lists all existing container instances
