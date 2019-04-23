@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSIONINFO=20190417.1
+VERSIONINFO=20190423.1
 
 #This utility only works if you source it (helps you jump to zcmd stacks)
 #Consider adding this to your .bashrc file...
@@ -21,7 +21,7 @@ echo "USAGE: $THISUTILFILENAME [FILTER1 [FILTER2]]"
 echo "       Optional arguments FILTER1 and FILTER2 reduce the output size."
 echo
 
-source $HOME/zcmd/plugins/cdutil.sh
+source $HOME/zcmd/plugins/configs/cdutil.env
 source $HOME/zcmd/devutils/default-docker-env.txt
 
 FILTER=$1
