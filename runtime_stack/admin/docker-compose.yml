@@ -1,8 +1,8 @@
 # The default Admin Stack functionality for ZCMD
 #
-# Updated 20190412.1
+# Updated 20190423.1
 
-version: "3.5"
+version: "3.3"
 
 services:
 
