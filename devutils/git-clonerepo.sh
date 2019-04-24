@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSIONINFO=20190416.1
+VERSIONINFO=20190424.1
 echo "Starting $0 v$VERSIONINFO"
 
 source $HOME/zcmd/devutils/default-docker-env.txt
@@ -8,6 +8,9 @@ function showUsage()
 {
 	echo "USAGE: $0 REPO_NAME"
 	echo "Pick a REPO_NAME value from the list shown here ..."
+        echo
+        echo "ssh git@${GIT_REPO_HOST_NAME}"
+        echo
 	ssh git@${GIT_REPO_HOST_NAME}
 }
 
