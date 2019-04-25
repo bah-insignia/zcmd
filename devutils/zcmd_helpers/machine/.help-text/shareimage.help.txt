@@ -8,5 +8,21 @@ zcmd shareimage [TAGNAME]
 
 Where ...
 
-    TAGNAME = Optional tagname to associate with the shared image.  
-              If no tagname value is provided then 'latest' is assumed.
+    TAGNAME = Required tagname to associate with the shared image.  
+              
+EXAMPLES
+--------
+
+To replace the default downloaded image ...
+
+    zcmd shareimage latest
+
+To share an image with a date based tag name ...
+
+    zcmd shareimage 20190425.1
+
+REQUIREMENT
+-----------
+You must have already built (see zcmd build) the image locally before you 
+can push it.
+

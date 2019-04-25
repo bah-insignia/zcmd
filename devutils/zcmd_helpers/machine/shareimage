@@ -11,13 +11,21 @@ fi
 
 source machine.env
 
+echo "This script writes the latest locally built image to the shared private Docker registry"
+echo "Usage: zcmd shareimage PUBLIC_TAGNAME"
+echo
+
 PUBLIC_TAGNAME=$1
 if [ -z "$PUBLIC_TAGNAME" ]; then
+    echo "ERROR: Missing required PUBLIC_TAGNAME value!"
+    echo
+    echo "NOTE: By default, Docker pulls tag "latest" so provide that value with caution."
+    echo "      Consider version controlling your tags with YYYYMMDD.# format tag names"
+    echo
+    exit 1
     PUBLIC_TAGNAME="latest"
 fi
 
-echo "This script writes the latest locally built image to the shared private Docker registry"
-echo "shareimage [PUBLIC_TAGNAME]"
 echo " --- registry $PRIVATE_DOCKER_REGISTRY"
 echo " --- local image name $LOCAL_IMAGE_NAME"
 echo " --- public image name $PUBLIC_IMAGE_NAME"
@@ -58,7 +66,13 @@ fi
 CMD="docker tag local/${LOCAL_IMAGE_NAME}:latest ${PRIVATE_DOCKER_REGISTRY}/${PUBLIC_IMAGE_NAME}:${PUBLIC_TAGNAME}"
 echo $CMD
 eval $CMD
+EC=$?
+if [ $EC -ne 0 ]; then
+    echo "!!!!!!!!!!!! EXIT CODE $EC !!!!!!!!!!!!!!!!!!"
+    exit 1
+fi
 
+echo
 echo "Now we push $PUBLIC_IMAGE_NAME into $PRIVATE_DOCKER_REGISTRY ..."
 
 CMD="docker push ${PRIVATE_DOCKER_REGISTRY}/${PUBLIC_IMAGE_NAME}"
