@@ -138,7 +138,8 @@ docker --version
 Docker version 18.09.5, build e8ff056
 ```
 
-```docker-compose --version
+```
+docker-compose --version
 docker-compose version 1.22.0, build f46880fe
 ```
 
