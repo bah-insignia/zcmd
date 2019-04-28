@@ -55,19 +55,23 @@ Follow these steps to launch a simple demonstration stack using zcmd and
 then shut it down.
 
 Create the place where we recommend placing your stacks...
-**Step 1: Create ~/docker-repos folder**
+
+* **Step 1: Create ~/docker-repos folder**
 
 Clone the demonstration stack...
-**Step 2: git clone https://github.com/bah-insignia/zcmd-demo-stack**
+
+* **Step 2: git clone https://github.com/bah-insignia/zcmd-demo-stack**
 
 Go into the stack folder of your demonstration stack... 
-**Step 3: cd ~/docker-repos/stack**
+
+* **Step 3: cd ~/docker-repos/zcmd-demo-stack/stack**
 
 Now, start the demonstration stack
-**Step 4: zcmd up**
+
+* **Step 4: zcmd up**
 
 Give the demonstration stack about a minute to start then have a look
-at the webpage available at localhost:11080
+at the webpage available at localhost:11080 in your browser.
 
 And finally, use one of the following commands to shut down your stack when you are done with it.
 * zcmd down <--- shuts down just the current stack
@@ -128,3 +132,13 @@ ENVIRONMENT COMPATIBILITY
 =========================
 The framework has been successfully used in Linux and Mac OSX.  It has 
 not been tested using Docker in native Windows.
+
+```
+docker --version
+Docker version 18.09.5, build e8ff056
+```
+
+```docker-compose --version
+docker-compose version 1.22.0, build f46880fe
+```
+
