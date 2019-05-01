@@ -1,4 +1,5 @@
 #!/bin/bash
+#Updated 20190501.1
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 source $HOME/zcmd/devutils/function-library/check-context.bash
@@ -47,6 +48,12 @@ if [ ! -z "$MACHINE_PORT3306" ]; then
     MAP_PORTS="-p ${MACHINE_PORT3306}:3306"
 fi
 
+echo "CHECKING MACHINE_RUNCMD=$MACHINE_RUNCMD"
+if [ -z "$MACHINE_RUNCMD" ]; then
+    MACHINE_RUNCMD="/bin/sh"
+    echo "Defaulting to run command $MACHINE_RUNCMD"
+fi
+
 PWD=$(pwd)
 if [ -f "${PWD}/DEPRECATED.txt" ]; then
     echo
@@ -61,7 +68,7 @@ if [ -f "${PWD}/DEPRECATED.txt" ]; then
     sleep 2
 fi
 
-RUN_CMD="docker run --user=root -ti --rm $MAP_PORTS $LOCAL_IMAGE /bin/bash"
+RUN_CMD="docker run --user=root -ti --rm $MAP_PORTS $LOCAL_IMAGE $MACHINE_RUNCMD"
 
 echo $RUN_CMD
 eval $RUN_CMD
@@ -71,7 +78,7 @@ echo "EXIT CODE=$STATUS_CODE"
 if [ $STATUS_CODE -ne 0 ]; then
     REMOTE_IMAGE="${PRIVATE_DOCKER_REGISTRY}/${IMAGE_NAME}"
     echo "Possibly failed to run $LOCAL_IMAGE image, will now try $REMOTE_IMAGE"
-    RUN_CMD="docker run --user=root -ti $MAP_PORTS $REMOTE_IMAGE /bin/bash"
+    RUN_CMD="docker run --user=root -ti $MAP_PORTS $REMOTE_IMAGE $MACHINE_RUNCMD"
     echo $RUN_CMD
     eval $RUN_CMD
     STATUS_CODE=$?
