@@ -9,6 +9,10 @@ PROD environments.
 
 REQUIREMENTS
 ============
+You've installed the contents of this git repo into the following location ...
+
+* $HOME/zcmd
+
 You have the following environment variable ...
 
     export ZCMD_HOME=$HOME/zcmd
@@ -17,10 +21,10 @@ And your PATH has the following added to it ...
 
     $ZCMD_HOME/devutils
 
-Also make sure you copy the following templates and fill them out:
+Also you copied the following templates from the $HOME/zcmd folder and filled them out:
 
-#"team-profile-template.env" to the name "team-profile.env" 
-#"custom-profile-template.env" to the name "custom-profile.env" 
+# "team-profile-template.env" to the name "team-profile.env" 
+# "custom-profile-template.env" to the name "custom-profile.env" 
 
 Some of the commands assume you have the following installed on your host:
 
@@ -143,3 +147,6 @@ docker-compose --version
 docker-compose version 1.22.0, build f46880fe
 ```
 
+HOW TO CONTRIBUTE?
+==================
+Contact us via this github site if you have ideas for refinements/enhancements or quirk fixes.
