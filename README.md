@@ -11,7 +11,7 @@ REQUIREMENTS
 ============
 You've installed the contents of this git repo into the following location ...
 
-* $HOME/zcmd
+    $HOME/zcmd
 
 You have the following environment variable ...
 
@@ -23,8 +23,8 @@ And your PATH has the following added to it ...
 
 Also you copied the following templates from the $HOME/zcmd folder and filled them out:
 
-# "team-profile-template.env" to the name "team-profile.env" 
-# "custom-profile-template.env" to the name "custom-profile.env" 
+* "team-profile-template.env" to the name "team-profile.env" 
+* "custom-profile-template.env" to the name "custom-profile.env" 
 
 Some of the commands assume you have the following installed on your host:
 
