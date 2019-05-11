@@ -149,6 +149,10 @@ docker-compose --version
 docker-compose version 1.22.0, build f46880fe
 ```
 
+WHERE CAN I READ MORE?
+======================
+You can start with the wiki content at https://github.com/bah-insignia/zcmd/wiki
+
 HOW TO CONTRIBUTE?
 ==================
 Contact us via this github site if you have ideas for refinements/enhancements or quirk fixes.
