@@ -93,12 +93,12 @@ ZCMD Utility
 ------------
 The main utility of the framework is invoked by typing **zcmd** at the command prompt of a properly configured host computer's terminal.  Some command examples ...
 
- * zcmd up <-- Starts a stack
- * zcmd psa <-- Lists all existing container instances
- * zcmd ct <-- Opens a terminal in a running container
- * zcmd down <-- Shuts down a stack
- * zcmd --help <-- Display all available options for the zcmd utility
- * zcmd --help up <-- Display detailed help for the up command
+* zcmd up <-- Starts a stack
+* zcmd psa <-- Lists all existing container instances
+* zcmd ct <-- Opens a terminal in a running container
+* zcmd down <-- Shuts down a stack
+* zcmd --help <-- Display all available options for the zcmd utility
+* zcmd --help up <-- Display detailed help for the up command
 
 SOME FOLDERS EXPLAINED
 ======================
@@ -115,10 +115,10 @@ devutils/zcmd_helpers
         global  -- commands that run from any folder
 
         machine -- commands that only run in a machine image folder
-                   NOTE: An image folder has **"machine.env" file**.
+                   NOTE: An image folder has a "machine.env" file.
 
         stack   -- commands that only run from a docker stack folder
-                   NOTE: A stack folder has **"stack.env" file**. 
+                   NOTE: A stack folder has a "stack.env" file. 
 
 devutils/zcmd_python
 
