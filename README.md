@@ -30,22 +30,22 @@ Also you copied the following templates from the $HOME/zcmd folder and filled th
 
 Some of the commands assume you have the following installed on your host:
 
-    * docker         <-- required for everything (you dont have this, you dont have docker)
-    * docker-compose <-- required for almost everything (how to build "zcmd stacks")
-    * aws utilities  <-- required for S3 interactions (e.g., backup files to S3/restore files from S3)
-    * mysql-client   <-- required for most database actions where mysql is persistend on the host
-    * python3        <-- required for some operations
+* docker         <-- required for everything (you dont have this, you dont have docker)
+* docker-compose <-- required for almost everything (how to build "zcmd stacks")
+* aws utilities  <-- required for S3 interactions (e.g., backup files to S3/restore files from S3)
+* mysql-client   <-- required for most database actions where mysql is persistend on the host
+* python3        <-- required for some operations
 
 Important Configuration Settings
 --------------------------------
 Update your ".bashrc" file, or ".profile" and log back in.
 
-    * ZCMD_HOME="$HOME/zcmd"
-    * PATH="$PATH:$ZCMD_HOME/devutils"
-    * alias cdutil=". ${ZCMD_HOME}/devutils/cdutil.sh"
+    ZCMD_HOME="$HOME/zcmd"
+    PATH="$PATH:$ZCMD_HOME/devutils"
+    alias cdutil=". ${ZCMD_HOME}/devutils/cdutil.sh"
 
-    * alias python="python3"
-    * alias pip="pip3"
+    alias python="python3"
+    alias pip="pip3"
 
 Other Configuration Tweaks
 --------------------------
