@@ -4,6 +4,8 @@ The ZCMD framework is a collection of bash and python utilities and configuratio
 conventions that facilitate the operation and management of 
 docker containers and collections of containers ("zcmd stacks").
 
+![ZCMD Logo](https://github.com/bah-insignia/zcmd-docs/blob/master/category/core/images/logo_400.png)
+
 The framework is intended to be appropriate for use in DEV, STAGE, and
 PROD environments.
 
@@ -28,22 +30,22 @@ Also you copied the following templates from the $HOME/zcmd folder and filled th
 
 Some of the commands assume you have the following installed on your host:
 
-    * docker         <-- required for everything (you dont have this, you dont have docker)
-    * docker-compose <-- required for almost everything (how to build "zcmd stacks")
-    * aws utilities  <-- required for S3 interactions (e.g., backup files to S3/restore files from S3)
-    * mysql-client   <-- required for most database actions where mysql is persistend on the host
-    * python3        <-- required for some operations
+* docker         <-- required for everything (you dont have this, you dont have docker)
+* docker-compose <-- required for almost everything (how to build "zcmd stacks")
+* aws utilities  <-- required for S3 interactions (e.g., backup files to S3/restore files from S3)
+* mysql-client   <-- required for most database actions where mysql is persistend on the host
+* python3        <-- required for some operations
 
 Important Configuration Settings
 --------------------------------
 Update your ".bashrc" file, or ".profile" and log back in.
 
-    * ZCMD_HOME="$HOME/zcmd"
-    * PATH="$PATH:$ZCMD_HOME/devutils"
-    * alias cdutil=". ${ZCMD_HOME}/devutils/cdutil.sh"
+    ZCMD_HOME="$HOME/zcmd"
+    PATH="$PATH:$ZCMD_HOME/devutils"
+    alias cdutil=". ${ZCMD_HOME}/devutils/cdutil.sh"
 
-    * alias python="python3"
-    * alias pip="pip3"
+    alias python="python3"
+    alias pip="pip3"
 
 Other Configuration Tweaks
 --------------------------
@@ -91,12 +93,12 @@ ZCMD Utility
 ------------
 The main utility of the framework is invoked by typing **zcmd** at the command prompt of a properly configured host computer's terminal.  Some command examples ...
 
- * zcmd up <-- Starts a stack
- * zcmd psa <-- Lists all existing container instances
- * zcmd ct <-- Opens a terminal in a running container
- * zcmd down <-- Shuts down a stack
- * zcmd --help <-- Display all available options for the zcmd utility
- * zcmd --help up <-- Display detailed help for the up command
+* zcmd up <-- Starts a stack
+* zcmd psa <-- Lists all existing container instances
+* zcmd ct <-- Opens a terminal in a running container
+* zcmd down <-- Shuts down a stack
+* zcmd --help <-- Display all available options for the zcmd utility
+* zcmd --help up <-- Display detailed help for the up command
 
 SOME FOLDERS EXPLAINED
 ======================
@@ -113,10 +115,10 @@ devutils/zcmd_helpers
         global  -- commands that run from any folder
 
         machine -- commands that only run in a machine image folder
-                   NOTE: An image folder has **"machine.env" file**.
+                   NOTE: An image folder has a "machine.env" file.
 
         stack   -- commands that only run from a docker stack folder
-                   NOTE: A stack folder has **"stack.env" file**. 
+                   NOTE: A stack folder has a "stack.env" file. 
 
 devutils/zcmd_python
 
@@ -146,6 +148,11 @@ Docker version 18.09.5, build e8ff056
 docker-compose --version
 docker-compose version 1.22.0, build f46880fe
 ```
+You can find some installation tips at https://github.com/bah-insignia/zcmd/wiki/Installation-Tips
+
+WHERE CAN I READ MORE?
+======================
+You can start with the wiki content at https://github.com/bah-insignia/zcmd/wiki
 
 HOW TO CONTRIBUTE?
 ==================
