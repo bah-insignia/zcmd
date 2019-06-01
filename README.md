@@ -40,7 +40,7 @@ Important Configuration Settings
 --------------------------------
 Update your ".bashrc" file, or ".profile" and log back in.
 
-    ZCMD_HOME="$HOME/zcmd"
+    export ZCMD_HOME="$HOME/zcmd"
     PATH="$PATH:$ZCMD_HOME/devutils"
     alias cdutil=". ${ZCMD_HOME}/devutils/cdutil.sh"
 
