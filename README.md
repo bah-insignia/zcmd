@@ -4,7 +4,7 @@ The ZCMD framework is a collection of bash and python utilities and configuratio
 conventions that facilitate the operation and management of 
 docker containers and collections of containers ("zcmd stacks").
 
-![ZCMD Logo](https://github.com/bah-insignia/zcmd-docs/blob/master/category/core/images/logo_400.png)
+![ZCMD Logo](https://github.com/bah-insignia/zcmd-docs/blob/master/category/core/images/zcmd_200x157.png)
 
 The framework is intended to be appropriate for use in DEV, STAGE, and
 PROD environments.
