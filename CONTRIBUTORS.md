@@ -4,4 +4,8 @@ The ZCMD framework was created by Frank Font in 2017 with signficant early brain
 
 The framework was released open-source in 2019.
 
+Logo Graphic
+------------
+Very cool logo created by Richard Caseres in June 2019.
+
 
