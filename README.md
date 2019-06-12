@@ -1,5 +1,5 @@
 
-![ZCMD Logo](https://github.com/bah-insignia/zcmd-docs/blob/master/category/core/images/zcmd-logo-300x127.png)
+![ZCMD Logo](https://github.com/bah-insignia/zcmd-docs/blob/master/category/core/images/logos/logo136-small.png)
 
 PURPOSE
 =======
