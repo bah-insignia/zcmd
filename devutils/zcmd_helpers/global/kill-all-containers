@@ -19,10 +19,27 @@ if [ $COUNTER -eq 0 ]; then
     echo "No running containers found!"
     echo
 else
-    echo
-    echo "PRESS CTRL-C now to ABORT else ENTER to kill all $COUNTER containers"
-    read
-    echo
+
+    PARAM1=$1
+    if [ ! -z "$PARAM1" ]; then
+        echo $PARAM1
+        if [ "$PARAM1" == "-f" ]; then
+            FORCED="true"
+        else
+            FORCED="false"
+        fi
+    else
+        FORCED="false"
+    fi
+
+    if [ "false" == "$FORCED" ]; then
+        echo
+        echo "PRESS CTRL-C now to ABORT else ENTER to kill all $COUNTER containers"
+        echo "! passing the parameter '-f' will bypass this confirmation step"
+        read
+        echo
+    fi
+
 
     for NAME in $(echo $THELIST); do
       if [ ! "$NAME" = "NAMES" ]; then
