@@ -1,5 +1,5 @@
 #!/bin/bash
-#Updated 20190707.1
+#Updated 20190707.2
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 source $HOME/zcmd/devutils/function-library/check-context.bash
@@ -37,7 +37,7 @@ for line in $(cat machine.env); do
         OUTSIDE_PORT=${RAWMAP%=*}
         INSIDE_PORT=${RAWMAP#*=}
         echo "... map OUTSIDE PORT # $OUTSIDE_PORT to INSIDE PORT # $INSIDE_PORT"
-        MAP_PORTS="$MAP_PORTS -p ${MACHINE_PORT80}:80"
+        MAP_PORTS="$MAP_PORTS -p ${INSIDE_PORT}:${OUTSIDE_PORT}"
     fi
 done
 
