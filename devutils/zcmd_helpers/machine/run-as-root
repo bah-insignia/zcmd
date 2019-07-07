@@ -1,5 +1,5 @@
 #!/bin/bash
-#Updated 20190707.2
+#Updated 20190707.3
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 source $HOME/zcmd/devutils/function-library/check-context.bash
@@ -32,12 +32,12 @@ MAP_PORTS=""
 echo "CHECKING MACHINE_PORTnum_outside=num_inside"
 for line in $(cat machine.env); do
     if [ ! -z $(echo $line | grep "^MACHINE_PORT") ]; then
-        echo "FOUND $line"
+        echo "found $line"
         RAWMAP=${line:12}
-        OUTSIDE_PORT=${RAWMAP%=*}
-        INSIDE_PORT=${RAWMAP#*=}
+        INSIDE_PORT=${RAWMAP%=*}
+        OUTSIDE_PORT=${RAWMAP#*=}
         echo "... map OUTSIDE PORT # $OUTSIDE_PORT to INSIDE PORT # $INSIDE_PORT"
-        MAP_PORTS="$MAP_PORTS -p ${INSIDE_PORT}:${OUTSIDE_PORT}"
+        MAP_PORTS="$MAP_PORTS -p ${OUTSIDE_PORT}:${INSIDE_PORT}"
     fi
 done
 
