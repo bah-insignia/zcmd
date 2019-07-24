@@ -1,5 +1,5 @@
 #!/bin/bash
-ZCMD_VERSIONINFO="20190722.1"
+ZCMD_VERSIONINFO="20190722.2"
 DASH_HELP_OPTION="--help"
 DASH_VERSION_OPTION="--version"
 DASH_ENV_NAME_OPTION="--environment-name"
@@ -67,16 +67,27 @@ function showUsage()
     echo
     if [ -z "$CONTEXT_NAME" ] || [ "stack" = "$CONTEXT_NAME" ] || [ "showall" = "$CONTEXT_NAME" ]; then
         echo "STACK COMMAND options (work from stack folders) ..."
-        echo "$STACK_COMMANDS"
+        export IFS=";"
+        ALL_COMMANDS=$(echo $STACK_COMMANDS | tr "\n" ";") 
+        for word in $ALL_COMMANDS; do
+            echo "   $word"
+        done
         echo
     fi
     if [ -z "$CONTEXT_NAME" ] || [ "machine" = "$CONTEXT_NAME" ] || [ "showall" = "$CONTEXT_NAME" ]; then
         echo "MACHINE COMMAND options (work from machine folders) ..."
-        echo "$MACHINE_COMMANDS"
+        export IFS=";"
+        ALL_COMMANDS=$(echo $MACHINE_COMMANDS | tr "\n" ";") 
+        for word in $ALL_COMMANDS; do
+            echo "   $word"
+        done
         echo
     fi
     echo "GLOBAL COMMAND options (work from any folder) ..."
-    echo "$GLOBAL_COMMANDS"
+    ALL_COMMANDS=$(echo $GLOBAL_COMMANDS | tr "\n" ";") 
+    for word in $ALL_COMMANDS; do
+        echo "   $word"
+    done
     echo
     echo "OTHER options ..."
     echo "$DASH_HELP_OPTION [COMMAND_NAME]"
