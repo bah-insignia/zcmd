@@ -1,5 +1,5 @@
 #!/bin/bash
-ZCMD_VERSIONINFO="20190417.1"
+ZCMD_VERSIONINFO="20190722.1"
 DASH_HELP_OPTION="--help"
 DASH_VERSION_OPTION="--version"
 DASH_ENV_NAME_OPTION="--environment-name"
@@ -86,6 +86,68 @@ function showUsage()
     echo " "
 }
 
+function showFancyHelp()
+{
+    local HELP4CMD=$1
+    local CONTEXT_NAME=$2   
+    local LOCK_CONTEXT_NAME=$3
+
+    if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${HELP4CMD}" ]; then
+        if [ "NO" = "$LOCK_CONTEXT_NAME" ]; then
+            #Look everywhere
+            local ALL_CONTEXT=( "stack" "machine" "global" )
+            local GOT_HIT="NO"
+            for CONTEXT_NAME in "${ALL_CONTEXT[@]}"
+            do
+                echo "Searching ${CONTEXT_NAME} context for help on '${HELP4CMD}' ..."
+                if [ -f "${HELPERSROOTPATH}/${CONTEXT_NAME}/${HELP4CMD}" ]; then
+                    GOT_HIT="YES"
+                    break
+                fi
+            done
+            if [ "NO" = "$GOT_HIT" ]; then
+                #Undefined command!
+                echo
+                echo "BAD HELP ARGUMENT!  There is no command '$HELP4CMD'!"
+                echo
+                echo "Showing general help ..."
+                showUsage "showall"
+                echo " "
+                exit 2
+            fi
+        fi
+    fi    
+
+    HELPFILENAME="${HELP4CMD}.help.txt"
+    HELPFILEDIR="${HELPERSROOTPATH}/${CONTEXT_NAME}/.help-text"
+    HELPFILEPATH="${HELPFILEDIR}/${HELPFILENAME}"
+    if [ ! -f "$HELPFILEPATH" ]; then
+        echo
+        if [ ! -z "$HELP4CMD" ]; then
+            #Tell them there is no file matching that command yet
+            echo " "
+            echo "Did NOT find $HELPFILEPATH"
+            echo
+        fi
+        echo "Currently existing '${CONTEXT_NAME}' context help files are ..."
+        echo "*** Start of existing help files ***"
+        ls $HELPFILEDIR
+        echo "*** End of existing help files ***"
+        echo
+        exit 2
+    else
+        #Show the file contents
+        echo
+        echo "Found help for zcmd ${HELP4CMD} in '${CONTEXT_NAME}' context ..."
+        echo " "
+        echo "==============================================================================="
+        cat $HELPFILEPATH
+        echo "==============================================================================="
+        echo
+        exit 0
+    fi
+}
+
 #Trap param BEFORE we output any text
 if [ "JUST_SHOW_OPTIONS" = "$1" ]; then
     #NOTE -- This output is used by command completion logic!
@@ -127,7 +189,7 @@ if [ -z "$1" ]; then
 fi
 
 #Do they want fancy help?
-if [ "--help" = "$1" ]; then
+if [ "$DASH_HELP_OPTION" = "$1" ]; then
 
     #Yes, they want fancy help!
     HELP4CMD="$2"
@@ -155,52 +217,8 @@ if [ "--help" = "$1" ]; then
         HELP4CMD="$3"
     fi
 
-    if [ "NO" = "$LOCK_CONTEXT_NAME" ]; then
-        #Switch to global if not in current context
-        if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${HELP4CMD}" ]; then
-            CONTEXT_NAME='global'
-            if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${HELP4CMD}" ]; then
-                #Undefined command!
-                echo
-                echo "BAD ARGUMENT!  There is no command '$HELP4CMD'!"
-                echo
-                echo "Showing general help ..."
-                showUsage "showall"
-                echo " "
-                exit 2
-            fi
-        fi
-    fi
-
     #Show specific help, if it exists
-    HELPFILENAME="${HELP4CMD}.help.txt"
-    HELPFILEDIR="${HELPERSROOTPATH}/${CONTEXT_NAME}/.help-text"
-    HELPFILEPATH="${HELPFILEDIR}/${HELPFILENAME}"
-    if [ ! -f "$HELPFILEPATH" ]; then
-        echo
-        if [ ! -z "$HELP4CMD" ]; then
-            #Tell them there is no file matching that command yet
-            echo " "
-            echo "Did NOT find $HELPFILEPATH"
-            echo
-        fi
-        echo "Currently existing '${CONTEXT_NAME}' context help files are ..."
-        echo "*** Start of existing help files ***"
-        ls $HELPFILEDIR
-        echo "*** End of existing help files ***"
-        echo
-        exit 2
-    else
-        #Show the file contents
-        echo
-        echo "Help for zcmd ${HELP4CMD} ..."
-        echo " "
-        echo "==============================================================================="
-        cat $HELPFILEPATH
-        echo "==============================================================================="
-        echo
-        exit 0
-    fi
+    showFancyHelp "${HELP4CMD}" "${CONTEXT_NAME}" "${LOCK_CONTEXT_NAME}"  
 
 fi
 
