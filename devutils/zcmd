@@ -59,6 +59,21 @@ STACK_COMMANDS=$(cd $HELPERSROOTPATH/stack && ls)
 MACHINE_COMMANDS=$(cd $HELPERSROOTPATH/machine && ls)
 GLOBAL_COMMANDS=$(cd $HELPERSROOTPATH/global && ls)
 
+STACK_ALIAS_COMMANDS=$(cd $HELPERSROOTPATH/stack/.command-alias && ls)
+MACHINE_ALIAS_COMMANDS=$(cd $HELPERSROOTPATH/machine/.command-alias && ls)
+GLOBAL_ALIAS_COMMANDS=$(cd $HELPERSROOTPATH/global/.command-alias && ls)
+
+function getCommandAliasContent()
+{
+    local CONTEXT_NAME=$1    
+    local COMMAND_NAME=$2
+    local FULL_ALIAS_PATH="$HELPERSROOTPATH/${CONTEXT_NAME}/.command-alias/${COMMAND_NAME}"
+    if [ ! -f "${FULL_ALIAS_PATH}" ]; then
+        echo ""
+    fi
+    echo $(cat $FULL_ALIAS_PATH)
+}
+
 function showUsage()
 {
     local CONTEXT_NAME=$1
@@ -73,6 +88,15 @@ function showUsage()
             echo "   $word"
         done
         echo
+        if [ ! -z "$STACK_ALIAS_COMMANDS" ]; then
+            echo "   And STACK alias commands ..."
+            ALL_COMMANDS=$(echo $STACK_ALIAS_COMMANDS | tr "\n" ";") 
+            for word in $ALL_COMMANDS; do
+                local ALIAS_CONTENT=$(getCommandAliasContent "stack" "$word")
+                echo "     $word = $ALIAS_CONTENT"
+            done
+            echo
+        fi
     fi
     if [ -z "$CONTEXT_NAME" ] || [ "machine" = "$CONTEXT_NAME" ] || [ "showall" = "$CONTEXT_NAME" ]; then
         echo "MACHINE COMMAND options (work from machine folders) ..."
@@ -82,6 +106,15 @@ function showUsage()
             echo "   $word"
         done
         echo
+        if [ ! -z "$MACHINE_ALIAS_COMMANDS" ]; then
+            echo "   And MACHINE alias commands ..."
+            ALL_COMMANDS=$(echo $MACHINE_ALIAS_COMMANDS | tr "\n" ";") 
+            for word in $ALL_COMMANDS; do
+                local ALIAS_CONTENT=$(getCommandAliasContent "machine" "$word")
+                echo "     $word = $ALIAS_CONTENT"
+            done
+            echo
+        fi
     fi
     echo "GLOBAL COMMAND options (work from any folder) ..."
     ALL_COMMANDS=$(echo $GLOBAL_COMMANDS | tr "\n" ";") 
@@ -89,23 +122,22 @@ function showUsage()
         echo "   $word"
     done
     echo
+    if [ ! -z "$GLOBAL_ALIAS_COMMANDS" ]; then
+        echo "   And GLOBAL alias commands ..."
+        ALL_COMMANDS=$(echo $GLOBAL_ALIAS_COMMANDS | tr "\n" ";") 
+        for word in $ALL_COMMANDS; do
+            local ALIAS_CONTENT=$(getCommandAliasContent "global" "$word")
+            echo "     $word = $ALIAS_CONTENT"
+        done
+        echo
+    fi
+    echo
     echo "OTHER options ..."
     echo "$DASH_HELP_OPTION [COMMAND_NAME]"
     echo "$DASH_VERSION_OPTION"
     echo "$DASH_ENV_NAME_OPTION"
     echo "$DASH_ENV_INFO_OPTION, $DASH_ENV_INFO_SHORT_OPTION"
     echo " "
-}
-
-function getCommandAliasContent()
-{
-    local CONTEXT_NAME=$1    
-    local COMMAND_NAME=$2
-    local FULL_ALIAS_PATH="$HELPERSROOTPATH/${CONTEXT_NAME}/.command-alias/${COMMAND_NAME}"
-    if [ ! -f "${FULL_ALIAS_PATH}" ]; then
-        echo ""
-    fi
-    echo $(cat $FULL_ALIAS_PATH)
 }
 
 function showFancyHelp()
