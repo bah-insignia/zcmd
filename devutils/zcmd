@@ -1,5 +1,5 @@
 #!/bin/bash
-ZCMD_VERSIONINFO="20190727.1"
+ZCMD_VERSIONINFO="20190727.2"
 DASH_HELP_OPTION="--help"
 DASH_VERSION_OPTION="--version"
 DASH_ENV_NAME_OPTION="--environment-name"
@@ -246,16 +246,27 @@ TOPARGTOOMANY=$9
 if [ ! -z "$TOPARGTOOMANY" ]; then
     #At lest tell them we are ignoring the extra arguments
     echo ""
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "!!                                                 !!"
-    echo "!! WARNING TOO MANY ARGUMENTS PASSED TO ZCMD!!     !!"
-    echo "!!                                                 !!"
-    echo "!! IGNORING $TOPARGTOOMANY"
-    echo "!!                                                 !!"
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#!!                                                 !!"
+    echo "#!! WARNING TOO MANY ARGUMENTS PASSED TO ZCMD!!     !!"
+    echo "#!!                                                 !!"
+    echo "#!! IGNORING $TOPARGTOOMANY"
+    echo "#!!                                                 !!"
+    echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 fi
+
+function getCommandAliasContent()
+{
+    local CONTEXT_NAME=$1    
+    local COMMAND_NAME=$2
+    local FULL_ALIAS_PATH="$HELPERSROOTPATH/${CONTEXT_NAME}/.command-alias/${COMMAND_NAME}"
+    if [ ! -f "${FULL_ALIAS_PATH}" ]; then
+        echo ""
+    fi
+    echo $(cat $FULL_ALIAS_PATH)
+}
 
 function runCommand()
 {
@@ -264,11 +275,18 @@ function runCommand()
     local FULL_COMMAND="$COMMAND_NAME $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
 
     if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
-        CONTEXT_NAME='global'
-        if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
-            #Undefined command!
-            return 2
-        fi
+        #See if we have an alias
+        local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$COMMAND_NAME")
+        if [ ! -z "$ALIAS_CONTENT" ]; then
+            echo "# Alias content for '$COMMAND_NAME' is $ALIAS_CONTENT"
+            local FULL_COMMAND="$ALIAS_CONTENT $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
+        else
+            CONTEXT_NAME='global'
+            if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
+                #Undefined command!
+                return 2
+            fi
+        fi    
     fi
 
     echo "#Will now launch ${CONTEXT_NAME} context command ${COMMAND_NAME} from folder $(pwd) ..."
