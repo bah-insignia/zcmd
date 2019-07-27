@@ -1,5 +1,5 @@
 #!/bin/bash
-ZCMD_VERSIONINFO="20190727.2"
+ZCMD_VERSIONINFO="20190727.3"
 DASH_HELP_OPTION="--help"
 DASH_VERSION_OPTION="--version"
 DASH_ENV_NAME_OPTION="--environment-name"
@@ -97,6 +97,17 @@ function showUsage()
     echo " "
 }
 
+function getCommandAliasContent()
+{
+    local CONTEXT_NAME=$1    
+    local COMMAND_NAME=$2
+    local FULL_ALIAS_PATH="$HELPERSROOTPATH/${CONTEXT_NAME}/.command-alias/${COMMAND_NAME}"
+    if [ ! -f "${FULL_ALIAS_PATH}" ]; then
+        echo ""
+    fi
+    echo $(cat $FULL_ALIAS_PATH)
+}
+
 function showFancyHelp()
 {
     local HELP4CMD=$1
@@ -104,6 +115,14 @@ function showFancyHelp()
     local LOCK_CONTEXT_NAME=$3
 
     if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${HELP4CMD}" ]; then
+        local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$HELP4CMD")
+        if [ ! -z "$ALIAS_CONTENT" ]; then
+            echo "This is a ${CONTEXT_NAME} COMMAND ALIAS for the following command ..."
+            echo ""
+            echo "  zcmd $ALIAS_CONTENT"
+            echo ""
+            exit 0
+        fi
         if [ "NO" = "$LOCK_CONTEXT_NAME" ]; then
             #Look everywhere
             local ALL_CONTEXT=( "stack" "machine" "global" )
@@ -114,6 +133,14 @@ function showFancyHelp()
                 if [ -f "${HELPERSROOTPATH}/${CONTEXT_NAME}/${HELP4CMD}" ]; then
                     GOT_HIT="YES"
                     break
+                fi
+                local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$HELP4CMD")
+                if [ ! -z "$ALIAS_CONTENT" ]; then
+                    echo "This is a ${CONTEXT_NAME} COMMAND ALIAS for the following command ..."
+                    echo ""
+                    echo "  zcmd $ALIAS_CONTENT"
+                    echo ""
+                    exit 0
                 fi
             done
             if [ "NO" = "$GOT_HIT" ]; then
@@ -256,17 +283,6 @@ if [ ! -z "$TOPARGTOOMANY" ]; then
     echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 fi
-
-function getCommandAliasContent()
-{
-    local CONTEXT_NAME=$1    
-    local COMMAND_NAME=$2
-    local FULL_ALIAS_PATH="$HELPERSROOTPATH/${CONTEXT_NAME}/.command-alias/${COMMAND_NAME}"
-    if [ ! -f "${FULL_ALIAS_PATH}" ]; then
-        echo ""
-    fi
-    echo $(cat $FULL_ALIAS_PATH)
-}
 
 function runCommand()
 {
