@@ -65,13 +65,16 @@ GLOBAL_ALIAS_COMMANDS=$(cd $HELPERSROOTPATH/global/.command-alias && ls)
 
 function getCommandAliasContent()
 {
+    #Using tr to remove strange trash showing up for unknown reasons in the string sometimes
     local CONTEXT_NAME=$1    
     local COMMAND_NAME=$2
+    local CLEAN_CMDNAME=$(echo $COMMAND_NAME | tr ";" " " | tr "''" " ")
     local FULL_ALIAS_PATH="$HELPERSROOTPATH/${CONTEXT_NAME}/.command-alias/${COMMAND_NAME}"
-    if [ ! -f "${FULL_ALIAS_PATH}" ]; then
+    local CLEAN_PATH=$(echo $FULL_ALIAS_PATH | tr ";" " " | tr "''" " ")
+    if [ ! -f "${CLEAN_PATH}" ]; then
         echo ""
     fi
-    echo $(cat $FULL_ALIAS_PATH)
+    echo $(cat $CLEAN_PATH)
 }
 
 function showUsage()
@@ -85,15 +88,17 @@ function showUsage()
         export IFS=";"
         ALL_COMMANDS=$(echo $STACK_COMMANDS | tr "\n" ";") 
         for word in $ALL_COMMANDS; do
-            echo "   $word"
+            local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+            echo "   $CLEAN_CMDNAME"
         done
         echo
         if [ ! -z "$STACK_ALIAS_COMMANDS" ]; then
             echo "   And STACK alias commands ..."
             ALL_COMMANDS=$(echo $STACK_ALIAS_COMMANDS | tr "\n" ";") 
             for word in $ALL_COMMANDS; do
-                local ALIAS_CONTENT=$(getCommandAliasContent "stack" "$word")
-                echo "     $word = $ALIAS_CONTENT"
+                local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+                local ALIAS_CONTENT=$(getCommandAliasContent "stack" "$CLEAN_CMDNAME")
+                echo "     $CLEAN_CMDNAME = $ALIAS_CONTENT"
             done
             echo
         fi
@@ -103,15 +108,17 @@ function showUsage()
         export IFS=";"
         ALL_COMMANDS=$(echo $MACHINE_COMMANDS | tr "\n" ";") 
         for word in $ALL_COMMANDS; do
-            echo "   $word"
+            local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+            echo "   $CLEAN_CMDNAME"
         done
         echo
         if [ ! -z "$MACHINE_ALIAS_COMMANDS" ]; then
             echo "   And MACHINE alias commands ..."
             ALL_COMMANDS=$(echo $MACHINE_ALIAS_COMMANDS | tr "\n" ";") 
             for word in $ALL_COMMANDS; do
-                local ALIAS_CONTENT=$(getCommandAliasContent "machine" "$word")
-                echo "     $word = $ALIAS_CONTENT"
+                local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+                local ALIAS_CONTENT=$(getCommandAliasContent "machine" "$CLEAN_CMDNAME")
+                echo "     $CLEAN_CMDNAME = $ALIAS_CONTENT"
             done
             echo
         fi
@@ -119,15 +126,17 @@ function showUsage()
     echo "GLOBAL COMMAND options (work from any folder) ..."
     ALL_COMMANDS=$(echo $GLOBAL_COMMANDS | tr "\n" ";") 
     for word in $ALL_COMMANDS; do
-        echo "   $word"
+        local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+        echo "   $CLEAN_CMDNAME"
     done
     echo
     if [ ! -z "$GLOBAL_ALIAS_COMMANDS" ]; then
         echo "   And GLOBAL alias commands ..."
         ALL_COMMANDS=$(echo $GLOBAL_ALIAS_COMMANDS | tr "\n" ";") 
         for word in $ALL_COMMANDS; do
-            local ALIAS_CONTENT=$(getCommandAliasContent "global" "$word")
-            echo "     $word = $ALIAS_CONTENT"
+            local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+            local ALIAS_CONTENT=$(getCommandAliasContent "global" "$CLEAN_CMDNAME")
+            echo "     $CLEAN_CMDNAME = $ALIAS_CONTENT"
         done
         echo
     fi
