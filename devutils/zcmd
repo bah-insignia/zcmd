@@ -1,5 +1,5 @@
 #!/bin/bash
-ZCMD_VERSIONINFO="20190727.3"
+ZCMD_VERSIONINFO="20190728.1"
 DASH_HELP_OPTION="--help"
 DASH_VERSION_OPTION="--version"
 DASH_ENV_NAME_OPTION="--environment-name"
@@ -149,7 +149,7 @@ function showFancyHelp()
     if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${HELP4CMD}" ]; then
         local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$HELP4CMD")
         if [ ! -z "$ALIAS_CONTENT" ]; then
-            echo "This is a ${CONTEXT_NAME} COMMAND ALIAS for the following command ..."
+            echo "Command '${HELP4CMD}' is a '${CONTEXT_NAME}' alias for the following command ..."
             echo ""
             echo "  zcmd $ALIAS_CONTENT"
             echo ""
