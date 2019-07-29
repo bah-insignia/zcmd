@@ -1,11 +1,11 @@
 #!/bin/bash
-VERSIONINFO=20181129.1
+VERSIONINFO=20190417.1
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 
 BASENAME=$(basename $0)
 echo "SCRIPT PURPOSE: Open a command-line terminal into a running docker container"
-echo "SYNTAX: zcmd $BASENAME [CONTAINER_NAME] [USERNAME]"
+echo "SYNTAX: zcmd $BASENAME [CONTAINER_NAME] [USERNAME] [CMD_OVERRIDE]"
 echo
 
 THELIST=$(docker container ls | awk '{print $NF}')
@@ -34,11 +34,12 @@ fi
 
 USERNAME=$2
 if [ -z "$USERNAME" ]; then
-    if [ ! -z "$TERMINAL_USERNAME" ]; then
-        USERNAME="$TERMINAL_USERNAME"
-    else
-        USERNAME="DEFAULT"
-    fi
+    USERNAME="DEFAULT"
+fi
+
+CT_CMD=$3
+if [ -z "$CT_CMD" ]; then
+    CT_CMD="DEFAULT"
 fi
 
 echo
@@ -115,12 +116,44 @@ fi
 
 if [ "DEFAULT" = "$USERNAME" ]; then
     echo "CONTAINER CONTEXT: Opening terminal to $CONTAINERNAME as DEFAULT USER ..."
-    USERARG=""
+    if [ "admin_zcmd_stub" = "${CONTAINERNAME}" ]; then
+        #Special case the core admin stack stub
+        USERARG=" --user=root"
+    else
+        if [ ! -z "$TERMINAL_USERNAME" ]; then
+            USERARG=" --user=$TERMINAL_USERNAME"
+        else
+            USERARG=""
+        fi
+    fi
 else
     echo "CONTAINER CONTEXT: Opening terminal to $CONTAINERNAME as USER=$USERNAME ..."
     USERARG=" --user=${USERNAME}"
 fi
 
-echo docker exec -ti ${USERARG} ${CONTAINERNAME} /bin/bash
-docker exec -ti ${USERARG} ${CONTAINERNAME} /bin/bash
+if [ "DEFAULT" = "$CT_CMD" ]; then
+    echo "CONTAINER CONTEXT: Opening terminal to $CONTAINERNAME with DEFAULT COMMAND ..."
+    if [ "admin_zcmd_stub" = "${CONTAINERNAME}" ]; then
+        #Special case the core admin stack stub
+        PROMPT_CMD="sh"
+    else
+        PROMPT_CMD="/bin/bash"
+    fi
+else
+    echo "CONTAINER CONTEXT: Opening terminal to $CONTAINERNAME with COMMAND=$CT_CMD ..."
+    PROMPT_CMD="$CT_CMD"
+fi
 
+CMD="docker exec -ti ${USERARG} ${CONTAINERNAME} ${PROMPT_CMD}"
+echo $CMD
+eval $CMD
+EC=$?
+if [ $EC -eq 0 ]; then
+    echo
+    echo "Successful terminal exit."
+    echo
+else
+    echo
+    echo "Terminal exit code $EC"
+    echo
+fi
