@@ -8,3 +8,4 @@ zcmd container-terminal [CONTAINER_NAME] [USERNAME]
 
     CONTAINER_NAME = Optional, lists all running containers if invalid or none specified.
     USERNAME       = Optional, uses the container runtime default if none specified.
+    PROMPT_CMD     = Optional, pass in 'sh' or 'bash'.  Defaults to 'bash' for most containers.

@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSIONINFO=20190417.1
+VERSIONINFO=20190731.1
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 
@@ -143,6 +143,8 @@ else
     echo "CONTAINER CONTEXT: Opening terminal to $CONTAINERNAME with COMMAND=$CT_CMD ..."
     PROMPT_CMD="$CT_CMD"
 fi
+
+echo "  PROMPT_CMD    = $PROMPT_CMD"
 
 CMD="docker exec -ti ${USERARG} ${CONTAINERNAME} ${PROMPT_CMD}"
 echo $CMD
