@@ -9,3 +9,14 @@ zcmd container-terminal [CONTAINER_NAME] [USERNAME]
     CONTAINER_NAME = Optional, lists all running containers if invalid or none specified.
     USERNAME       = Optional, uses the container runtime default if none specified.
     PROMPT_CMD     = Optional, pass in 'sh' or 'bash'.  Defaults to 'bash' for most containers.
+
+ALIAS NAMES
+-----------
+ct    -- Same as typing container-terminal
+ctxr  -- Same as typing container-terminal x root
+
+EXAMPLE
+-------
+Launch terminal into a container using 'sh' as the command prompt ...
+
+    ctxr sh    
