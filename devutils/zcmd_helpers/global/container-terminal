@@ -1,11 +1,11 @@
 #!/bin/bash
-VERSIONINFO=20190731.1
+VERSIONINFO=20190731.2
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 
 BASENAME=$(basename $0)
 echo "SCRIPT PURPOSE: Open a command-line terminal into a running docker container"
-echo "SYNTAX: zcmd $BASENAME [CONTAINER_NAME] [USERNAME] [CMD_OVERRIDE]"
+echo "SYNTAX: zcmd $BASENAME [CONTAINER_NAME] [USERNAME] [CMD_OVERRIDE] [WORKDIR]"
 echo
 
 THELIST=$(docker container ls | awk '{print $NF}')
@@ -40,6 +40,11 @@ fi
 CT_CMD=$3
 if [ -z "$CT_CMD" ]; then
     CT_CMD="DEFAULT"
+fi
+
+WORKDIR=$4
+if [ -z "$WORKDIR" ]; then
+    WORKDIR="DEFAULT"
 fi
 
 echo
@@ -144,9 +149,16 @@ else
     PROMPT_CMD="$CT_CMD"
 fi
 
-echo "  PROMPT_CMD    = $PROMPT_CMD"
+if [ "DEFAULT" = "$WORKDIR" ]; then
+    WORKDIRARG=""
+else
+    WORKDIRARG=" --workdir $WORKDIR"
+fi
 
-CMD="docker exec -ti ${USERARG} ${CONTAINERNAME} ${PROMPT_CMD}"
+echo "  PROMPT_CMD    = $PROMPT_CMD"
+echo "  WORKDIR       = $WORKDIR"
+
+CMD="docker exec -ti ${USERARG} ${WORKDIRARG} ${CONTAINERNAME} ${PROMPT_CMD}"
 echo $CMD
 eval $CMD
 EC=$?
