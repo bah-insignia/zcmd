@@ -1,5 +1,5 @@
 #!/bin/bash
-ZCMD_VERSIONINFO="20190728.2"
+ZCMD_VERSIONINFO="20190731.1"
 DASH_HELP_OPTION="--help"
 DASH_VERSION_OPTION="--version"
 DASH_ENV_NAME_OPTION="--environment-name"
@@ -332,6 +332,7 @@ function runCommand()
     local COMMAND_NAME=$2
     local FULL_COMMAND="$COMMAND_NAME $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
 
+    echo "# Checking '${CONTEXT_NAME}' context ..."
     if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
         #See if we have an alias
         local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$COMMAND_NAME")
@@ -340,14 +341,21 @@ function runCommand()
             local FULL_COMMAND="$ALIAS_CONTENT $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
         else
             CONTEXT_NAME='global'
+            echo "# Checking '${CONTEXT_NAME}' context ..."
             if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
-                #Undefined command!
-                return 2
+                local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$COMMAND_NAME")
+                if [ ! -z "$ALIAS_CONTENT" ]; then
+                    echo "# Alias content for '$COMMAND_NAME' is $ALIAS_CONTENT"
+                    local FULL_COMMAND="$ALIAS_CONTENT $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
+                else
+                    #Undefined command!
+                    return 2
+                fi    
             fi
         fi    
     fi
 
-    echo "#Will now launch ${CONTEXT_NAME} context command ${COMMAND_NAME} from folder $(pwd) ..."
+    echo "# Will now launch ${CONTEXT_NAME} context command ${COMMAND_NAME} from folder $(pwd) ..."
     COMPLETE_COMMAND="$HELPERSROOTPATH/${CONTEXT_NAME}/$FULL_COMMAND"
     echo "#>>> $COMPLETE_COMMAND"
     (cd $(pwd) && eval "$COMPLETE_COMMAND")
