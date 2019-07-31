@@ -19,4 +19,4 @@ EXAMPLE
 -------
 Launch terminal into a container using 'sh' as the command prompt ...
 
-    ctxr sh    
+    zcmd ctxr sh    
