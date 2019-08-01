@@ -7,7 +7,7 @@ Use this command when testing a new machine image from a command terminal.
 
 SYNTAX
 ------
-zcmd run [IMAGE_NAME [TAGNAME]]
+zcmd run=ct [IMAGE_NAME [TAGNAME]]
 
     USER_NAME  = Optional user name for terminal user.
     IMAGE_NAME = Optional image name, uses name from machine.env if not specified.

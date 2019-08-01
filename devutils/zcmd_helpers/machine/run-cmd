@@ -1,0 +1,106 @@
+#!/bin/bash
+#Updated 20190731.1
+
+source $HOME/zcmd/devutils/default-docker-env.txt
+source $HOME/zcmd/devutils/function-library/check-context.bash
+
+lib_isMachineImageFolder
+if [ $? -ne 0 ]; then
+    echo "ERROR: The command must be invoked from a valid machine context folder."
+    exit 2
+fi
+
+source machine.env
+
+USER_NAME=$1
+IMAGE_NAME=$2
+TAG_NAME=$3
+
+if [ -z "$USER_NAME" ]; then
+    USER_NAME="DEFAULT"
+fi
+
+if [ -z "$IMAGE_NAME" ]; then
+    IMAGE_NAME="DEFAULT"
+fi
+
+if [ -z "$TAG_NAME" ]; then
+    TAG_NAME="DEFAULT"
+fi
+
+CREATE_CMD=$HOME/zcmd/devutils/zcmd_helpers/machine/create
+
+MAP_PORTS=""
+
+echo "CHECKING MACHINE_PORT#outside=#inside"
+for line in $(cat machine.env); do
+    if [ ! -z $(echo $line | grep "^MACHINE_PORT") ]; then
+        echo "found $line"
+        RAWMAP=${line:12}
+        INSIDE_PORT=${RAWMAP%=*}
+        OUTSIDE_PORT=${RAWMAP#*=}
+        echo "... map OUTSIDE PORT # $OUTSIDE_PORT to INSIDE PORT # $INSIDE_PORT"
+        MAP_PORTS="$MAP_PORTS -p ${OUTSIDE_PORT}:${INSIDE_PORT}"
+    fi
+done
+
+if [ -z "$MAP_PORTS" ]; then
+    echo "No MACHINE_PORT mappings found"
+fi
+
+if [ ! -z "$MACHINE_RUNCMD" ]; then
+    CMDARG="$MACHINE_RUNCMD"
+else
+    CMDARG=""
+    MACHINE_RUNCMD="DEFAULT"
+    echo "Defaulting to run command $MACHINE_RUNCMD"
+fi
+
+PWD=$(pwd)
+if [ -f "${PWD}/DEPRECATED.txt" ]; then
+    echo
+    echo "WARNING: ${PWD} is DEPRECATED"
+    echo
+    echo "==========================================================================="
+    echo
+    cat ${PWD}/DEPRECATED.txt
+    echo
+    echo "==========================================================================="
+    echo
+    sleep 2
+fi
+
+USER_ARG=""
+if [ ! "DEFAULT" = "$USER_NAME" ]; then
+    USER_ARG="--user=root"
+fi
+
+if [ "DEFAULT" = "$IMAGE_NAME" ]; then
+    IMAGE_NAME="${LOCAL_IMAGE_NAME}"
+fi
+
+if [ "DEFAULT" = "$TAG_NAME" ]; then
+    TAG_NAME="latest"
+fi
+
+LOCAL_IMAGE="local/$IMAGE_NAME"
+
+RUN_CMD="docker run ${USER_ARG} --rm $MAP_PORTS $LOCAL_IMAGE $CMDARG"
+
+echo $RUN_CMD
+eval $RUN_CMD
+STATUS_CODE=$?
+
+echo "EXIT CODE=$STATUS_CODE"
+if [ $STATUS_CODE -ne 0 ]; then
+    REMOTE_IMAGE="${PRIVATE_DOCKER_REGISTRY}/${IMAGE_NAME}"
+    echo "Possibly failed to run $LOCAL_IMAGE image, will now try $REMOTE_IMAGE"
+    RUN_CMD="docker run ${USER_ARG} $MAP_PORTS $REMOTE_IMAGE $CMDARG"
+    echo $RUN_CMD
+    eval $RUN_CMD
+    STATUS_CODE=$?
+    echo "EXIT CODE=$STATUS_CODE"
+fi
+exit $STATUS_CODE
+
+

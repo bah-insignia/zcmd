@@ -1,5 +1,5 @@
 #!/bin/bash
-#Updated 20190728.1
+#Updated 20190731.1
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 source $HOME/zcmd/devutils/function-library/check-context.bash
@@ -32,7 +32,7 @@ CREATE_CMD=$HOME/zcmd/devutils/zcmd_helpers/machine/create
 
 MAP_PORTS=""
 
-echo "CHECKING MACHINE_PORTnum_outside=num_inside"
+echo "CHECKING MACHINE_PORT#outside=#inside"
 for line in $(cat machine.env); do
     if [ ! -z $(echo $line | grep "^MACHINE_PORT") ]; then
         echo "found $line"
@@ -44,10 +44,14 @@ for line in $(cat machine.env); do
     fi
 done
 
-echo "CHECKING MACHINE_RUNCMD=$MACHINE_RUNCMD"
-if [ -z "$MACHINE_RUNCMD" ]; then
-    MACHINE_RUNCMD="/bin/sh"
-    echo "Defaulting to run command $MACHINE_RUNCMD"
+if [ -z "$MAP_PORTS" ]; then
+    echo "No MACHINE_PORT mappings found"
+fi
+
+echo "CHECKING MACHINE_CT_RUNCMD=$MACHINE_CT_RUNCMD"
+if [ -z "$MACHINE_CT_RUNCMD" ]; then
+    MACHINE_CT_RUNCMD="/bin/sh"
+    echo "Defaulting to run command $MACHINE_CT_RUNCMD"
 fi
 
 PWD=$(pwd)
@@ -79,7 +83,7 @@ fi
 
 LOCAL_IMAGE="local/$IMAGE_NAME"
 
-RUN_CMD="docker run ${USER_ARG} -ti --rm $MAP_PORTS $LOCAL_IMAGE $MACHINE_RUNCMD"
+RUN_CMD="docker run ${USER_ARG} -ti --rm $MAP_PORTS $LOCAL_IMAGE $MACHINE_CT_RUNCMD"
 
 echo $RUN_CMD
 eval $RUN_CMD
@@ -89,7 +93,7 @@ echo "EXIT CODE=$STATUS_CODE"
 if [ $STATUS_CODE -ne 0 ]; then
     REMOTE_IMAGE="${PRIVATE_DOCKER_REGISTRY}/${IMAGE_NAME}"
     echo "Possibly failed to run $LOCAL_IMAGE image, will now try $REMOTE_IMAGE"
-    RUN_CMD="docker run ${USER_ARG} -ti $MAP_PORTS $REMOTE_IMAGE $MACHINE_RUNCMD"
+    RUN_CMD="docker run ${USER_ARG} -ti $MAP_PORTS $REMOTE_IMAGE $MACHINE_CT_RUNCMD"
     echo $RUN_CMD
     eval $RUN_CMD
     STATUS_CODE=$?
