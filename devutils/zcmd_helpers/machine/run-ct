@@ -15,6 +15,7 @@ source machine.env
 USER_NAME=$1
 IMAGE_NAME=$2
 TAG_NAME=$3
+CMD_OVERRIDE=$4
 
 if [ -z "$USER_NAME" ]; then
     USER_NAME="DEFAULT"
@@ -48,10 +49,16 @@ if [ -z "$MAP_PORTS" ]; then
     echo "No MACHINE_PORT mappings found"
 fi
 
-echo "CHECKING MACHINE_CT_RUNCMD=$MACHINE_CT_RUNCMD"
-if [ -z "$MACHINE_CT_RUNCMD" ]; then
-    MACHINE_CT_RUNCMD="/bin/sh"
-    echo "Defaulting to run command $MACHINE_CT_RUNCMD"
+if [ ! -z "$CMD_OVERRIDE" ]; then
+    CMDARG="$CMD_OVERRIDE"
+else
+    echo "CHECKING MACHINE_CT_RUNCMD=$MACHINE_CT_RUNCMD"
+    if [ ! -z "$MACHINE_CT_RUNCMD" ]; then
+        CMDARG="$MACHINE_CT_RUNCMD"
+    else
+        CMDARG="/bin/sh"
+        echo "Defaulting to run command $CMDARG"
+    fi
 fi
 
 PWD=$(pwd)
@@ -83,7 +90,7 @@ fi
 
 LOCAL_IMAGE="local/$IMAGE_NAME"
 
-RUN_CMD="docker run ${USER_ARG} -ti --rm $MAP_PORTS $LOCAL_IMAGE $MACHINE_CT_RUNCMD"
+RUN_CMD="docker run ${USER_ARG} -ti --rm $MAP_PORTS $LOCAL_IMAGE $CMDARG"
 
 echo $RUN_CMD
 eval $RUN_CMD
@@ -93,7 +100,7 @@ echo "EXIT CODE=$STATUS_CODE"
 if [ $STATUS_CODE -ne 0 ]; then
     REMOTE_IMAGE="${PRIVATE_DOCKER_REGISTRY}/${IMAGE_NAME}"
     echo "Possibly failed to run $LOCAL_IMAGE image, will now try $REMOTE_IMAGE"
-    RUN_CMD="docker run ${USER_ARG} -ti $MAP_PORTS $REMOTE_IMAGE $MACHINE_CT_RUNCMD"
+    RUN_CMD="docker run ${USER_ARG} -ti $MAP_PORTS $REMOTE_IMAGE $CMDARG"
     echo $RUN_CMD
     eval $RUN_CMD
     STATUS_CODE=$?

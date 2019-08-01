@@ -15,6 +15,8 @@ source machine.env
 USER_NAME=$1
 IMAGE_NAME=$2
 TAG_NAME=$3
+CMD_OVERRIDE=$4
+
 
 if [ -z "$USER_NAME" ]; then
     USER_NAME="DEFAULT"
@@ -48,12 +50,16 @@ if [ -z "$MAP_PORTS" ]; then
     echo "No MACHINE_PORT mappings found"
 fi
 
-if [ ! -z "$MACHINE_RUNCMD" ]; then
-    CMDARG="$MACHINE_RUNCMD"
+if [ ! -z "$CMD_OVERRIDE" ]; then
+    CMDARG="$CMD_OVERRIDE"
 else
-    CMDARG=""
-    MACHINE_RUNCMD="DEFAULT"
-    echo "Defaulting to run command $MACHINE_RUNCMD"
+    if [ ! -z "$MACHINE_RUNCMD" ]; then
+        CMDARG="$MACHINE_RUNCMD"
+    else
+        CMDARG=""
+        MACHINE_RUNCMD="DEFAULT"
+        echo "Defaulting to run command $MACHINE_RUNCMD"
+    fi
 fi
 
 PWD=$(pwd)
