@@ -1,17 +1,17 @@
 PURPOSE
 -------
-Create a container and open a terminal into it of the machine
-defined in the current folder.
+Create a container and run a command in it.
 
 Use this command when testing a new machine image from a command terminal.
 
 SYNTAX
 ------
-zcmd run-ct [IMAGE_NAME [TAGNAME]]
+zcmd run-cmd [IMAGE_NAME [TAGNAME]]
 
-    USER_NAME  = Optional user name for terminal user.
-    IMAGE_NAME = Optional image name, uses name from machine.env if not specified.
-    TAGNAME    = Optional, assumes 'latest' if not specified.
+    USER_NAME    = Optional user name for terminal user.
+    IMAGE_NAME   = Optional image name, uses name from machine.env if not specified.
+    TAGNAME      = Optional, assumes 'latest' if not specified.
+    CMD_OVERRIDE = Optional, otherwise defaults to existing MACHINE_RUNCMD var value.
 
 NOTES
 -----
@@ -26,4 +26,4 @@ EXAMPLE
 The following example will run the image defined in machine.env as the default
 user for that image using tag value "20190728.1".
 
-    zmcd run-ct DEFAULT DEFAULT 20190728.1
+    zmcd run-cmd DEFAULT DEFAULT 20190728.1
