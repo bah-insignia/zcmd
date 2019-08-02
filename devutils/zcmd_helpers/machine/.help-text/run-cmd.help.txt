@@ -1,0 +1,29 @@
+PURPOSE
+-------
+Create a container and run a command in it.
+
+Use this command when testing a new machine image from a command terminal.
+
+SYNTAX
+------
+zcmd run-cmd [IMAGE_NAME [TAGNAME]]
+
+    USER_NAME    = Optional user name for terminal user.
+    IMAGE_NAME   = Optional image name, uses name from machine.env if not specified.
+    TAGNAME      = Optional, assumes 'latest' if not specified.
+    CMD_OVERRIDE = Optional, otherwise defaults to existing MACHINE_RUNCMD var value.
+
+NOTES
+-----
+Tries running local image first, then tries remote image if local failed.
+Default image name, and port mappings (if any), come from machine.env
+
+You can pass the string "DEFAULT" as an explicit command for the script to use
+the default value in place of that argument.
+
+EXAMPLE
+-------
+The following example will run the image defined in machine.env as the default
+user for that image using tag value "20190728.1".
+
+    zmcd run-cmd DEFAULT DEFAULT 20190728.1

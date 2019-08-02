@@ -1,5 +1,5 @@
 #!/bin/bash
-ZCMD_VERSIONINFO="20190722.2"
+ZCMD_VERSIONINFO="20190731.1"
 DASH_HELP_OPTION="--help"
 DASH_VERSION_OPTION="--version"
 DASH_ENV_NAME_OPTION="--environment-name"
@@ -59,6 +59,25 @@ STACK_COMMANDS=$(cd $HELPERSROOTPATH/stack && ls)
 MACHINE_COMMANDS=$(cd $HELPERSROOTPATH/machine && ls)
 GLOBAL_COMMANDS=$(cd $HELPERSROOTPATH/global && ls)
 
+STACK_ALIAS_COMMANDS=$(cd $HELPERSROOTPATH/stack/.command-alias && ls)
+MACHINE_ALIAS_COMMANDS=$(cd $HELPERSROOTPATH/machine/.command-alias && ls)
+GLOBAL_ALIAS_COMMANDS=$(cd $HELPERSROOTPATH/global/.command-alias && ls)
+
+function getCommandAliasContent()
+{
+    #Using tr to remove strange trash showing up for unknown reasons in the string sometimes
+    local CONTEXT_NAME=$1    
+    local COMMAND_NAME=$2
+    local CLEAN_CMDNAME=$(echo $COMMAND_NAME | tr ";" " " | tr "''" " ")
+    local FULL_ALIAS_PATH="$HELPERSROOTPATH/${CONTEXT_NAME}/.command-alias/${COMMAND_NAME}"
+    local CLEAN_PATH=$(echo $FULL_ALIAS_PATH | tr ";" " " | tr "''" " ")
+    if [ ! -f "${CLEAN_PATH}" ]; then
+        echo ""
+    else    
+        echo $(cat $CLEAN_PATH)
+    fi
+}
+
 function showUsage()
 {
     local CONTEXT_NAME=$1
@@ -70,24 +89,58 @@ function showUsage()
         export IFS=";"
         ALL_COMMANDS=$(echo $STACK_COMMANDS | tr "\n" ";") 
         for word in $ALL_COMMANDS; do
-            echo "   $word"
+            local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+            echo "   $CLEAN_CMDNAME"
         done
         echo
+        if [ ! -z "$STACK_ALIAS_COMMANDS" ]; then
+            echo "   And STACK alias commands ..."
+            ALL_COMMANDS=$(echo $STACK_ALIAS_COMMANDS | tr "\n" ";") 
+            for word in $ALL_COMMANDS; do
+                local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+                local ALIAS_CONTENT=$(getCommandAliasContent "stack" "$CLEAN_CMDNAME")
+                echo "     $CLEAN_CMDNAME = $ALIAS_CONTENT"
+            done
+            echo
+        fi
     fi
     if [ -z "$CONTEXT_NAME" ] || [ "machine" = "$CONTEXT_NAME" ] || [ "showall" = "$CONTEXT_NAME" ]; then
         echo "MACHINE COMMAND options (work from machine folders) ..."
         export IFS=";"
         ALL_COMMANDS=$(echo $MACHINE_COMMANDS | tr "\n" ";") 
         for word in $ALL_COMMANDS; do
-            echo "   $word"
+            local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+            echo "   $CLEAN_CMDNAME"
         done
         echo
+        if [ ! -z "$MACHINE_ALIAS_COMMANDS" ]; then
+            echo "   And MACHINE alias commands ..."
+            ALL_COMMANDS=$(echo $MACHINE_ALIAS_COMMANDS | tr "\n" ";") 
+            for word in $ALL_COMMANDS; do
+                local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+                local ALIAS_CONTENT=$(getCommandAliasContent "machine" "$CLEAN_CMDNAME")
+                echo "     $CLEAN_CMDNAME = $ALIAS_CONTENT"
+            done
+            echo
+        fi
     fi
     echo "GLOBAL COMMAND options (work from any folder) ..."
     ALL_COMMANDS=$(echo $GLOBAL_COMMANDS | tr "\n" ";") 
     for word in $ALL_COMMANDS; do
-        echo "   $word"
+        local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+        echo "   $CLEAN_CMDNAME"
     done
+    echo
+    if [ ! -z "$GLOBAL_ALIAS_COMMANDS" ]; then
+        echo "   And GLOBAL alias commands ..."
+        ALL_COMMANDS=$(echo $GLOBAL_ALIAS_COMMANDS | tr "\n" ";") 
+        for word in $ALL_COMMANDS; do
+            local CLEAN_CMDNAME=$(echo $word | tr ";" " " | tr "''" " ")
+            local ALIAS_CONTENT=$(getCommandAliasContent "global" "$CLEAN_CMDNAME")
+            echo "     $CLEAN_CMDNAME = $ALIAS_CONTENT"
+        done
+        echo
+    fi
     echo
     echo "OTHER options ..."
     echo "$DASH_HELP_OPTION [COMMAND_NAME]"
@@ -104,6 +157,14 @@ function showFancyHelp()
     local LOCK_CONTEXT_NAME=$3
 
     if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${HELP4CMD}" ]; then
+        local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$HELP4CMD")
+        if [ ! -z "$ALIAS_CONTENT" ]; then
+            echo "Command '${HELP4CMD}' is a '${CONTEXT_NAME}' alias for the following command ..."
+            echo ""
+            echo "  zcmd $ALIAS_CONTENT"
+            echo ""
+            exit 0
+        fi
         if [ "NO" = "$LOCK_CONTEXT_NAME" ]; then
             #Look everywhere
             local ALL_CONTEXT=( "stack" "machine" "global" )
@@ -114,6 +175,14 @@ function showFancyHelp()
                 if [ -f "${HELPERSROOTPATH}/${CONTEXT_NAME}/${HELP4CMD}" ]; then
                     GOT_HIT="YES"
                     break
+                fi
+                local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$HELP4CMD")
+                if [ ! -z "$ALIAS_CONTENT" ]; then
+                    echo "This is a ${CONTEXT_NAME} COMMAND ALIAS for the following command ..."
+                    echo ""
+                    echo "  zcmd $ALIAS_CONTENT"
+                    echo ""
+                    exit 0
                 fi
             done
             if [ "NO" = "$GOT_HIT" ]; then
@@ -241,6 +310,21 @@ TOPARG5=$5
 TOPARG6=$6
 TOPARG7=$7
 TOPARG8=$8
+TOPARGTOOMANY=$9
+
+if [ ! -z "$TOPARGTOOMANY" ]; then
+    #At lest tell them we are ignoring the extra arguments
+    echo ""
+    echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#!!                                                 !!"
+    echo "#!! WARNING TOO MANY ARGUMENTS PASSED TO ZCMD!!     !!"
+    echo "#!!                                                 !!"
+    echo "#!! IGNORING $TOPARGTOOMANY"
+    echo "#!!                                                 !!"
+    echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+fi
 
 function runCommand()
 {
@@ -248,15 +332,30 @@ function runCommand()
     local COMMAND_NAME=$2
     local FULL_COMMAND="$COMMAND_NAME $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
 
+    echo "# Checking '${CONTEXT_NAME}' context ..."
     if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
-        CONTEXT_NAME='global'
-        if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
-            #Undefined command!
-            return 2
-        fi
+        #See if we have an alias
+        local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$COMMAND_NAME")
+        if [ ! -z "$ALIAS_CONTENT" ]; then
+            echo "# Alias content for '$COMMAND_NAME' is $ALIAS_CONTENT"
+            local FULL_COMMAND="$ALIAS_CONTENT $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
+        else
+            CONTEXT_NAME='global'
+            echo "# Checking '${CONTEXT_NAME}' context ..."
+            if [ ! -f "$HELPERSROOTPATH/${CONTEXT_NAME}/${COMMAND_NAME}" ]; then
+                local ALIAS_CONTENT=$(getCommandAliasContent "$CONTEXT_NAME" "$COMMAND_NAME")
+                if [ ! -z "$ALIAS_CONTENT" ]; then
+                    echo "# Alias content for '$COMMAND_NAME' is $ALIAS_CONTENT"
+                    local FULL_COMMAND="$ALIAS_CONTENT $TOPARG2 $TOPARG3 $TOPARG4 $TOPARG5 $TOPARG6 $TOPARG7 $TOPARG8"
+                else
+                    #Undefined command!
+                    return 2
+                fi    
+            fi
+        fi    
     fi
 
-    echo "#Will now launch ${CONTEXT_NAME} context command ${COMMAND_NAME} from folder $(pwd) ..."
+    echo "# Will now launch ${CONTEXT_NAME} context command ${COMMAND_NAME} from folder $(pwd) ..."
     COMPLETE_COMMAND="$HELPERSROOTPATH/${CONTEXT_NAME}/$FULL_COMMAND"
     echo "#>>> $COMPLETE_COMMAND"
     (cd $(pwd) && eval "$COMPLETE_COMMAND")

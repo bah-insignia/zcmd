@@ -1,5 +1,5 @@
 #!/bin/bash
-#Updated 20190707.3
+#Updated 20190731.1
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 source $HOME/zcmd/devutils/function-library/check-context.bash
@@ -12,24 +12,29 @@ fi
 
 source machine.env
 
-if [ ! -z "$1" ]; then
-    IMAGE_NAME=$1
-    TAGNAME=$2
-else
-    IMAGE_NAME=${LOCAL_IMAGE_NAME}
-    TAGNAME="latest"
-fi
-if [ -z "$TAGNAME" ]; then
-    TAGNAME="latest"
+USER_NAME=$1
+IMAGE_NAME=$2
+TAG_NAME=$3
+CMD_OVERRIDE=$4
+
+
+if [ -z "$USER_NAME" ]; then
+    USER_NAME="DEFAULT"
 fi
 
-LOCAL_IMAGE="local/$IMAGE_NAME"
+if [ -z "$IMAGE_NAME" ]; then
+    IMAGE_NAME="DEFAULT"
+fi
+
+if [ -z "$TAG_NAME" ]; then
+    TAG_NAME="DEFAULT"
+fi
 
 CREATE_CMD=$HOME/zcmd/devutils/zcmd_helpers/machine/create
 
 MAP_PORTS=""
 
-echo "CHECKING MACHINE_PORTnum_outside=num_inside"
+echo "CHECKING MACHINE_PORT#outside=#inside"
 for line in $(cat machine.env); do
     if [ ! -z $(echo $line | grep "^MACHINE_PORT") ]; then
         echo "found $line"
@@ -41,10 +46,20 @@ for line in $(cat machine.env); do
     fi
 done
 
-echo "CHECKING MACHINE_RUNCMD=$MACHINE_RUNCMD"
-if [ -z "$MACHINE_RUNCMD" ]; then
-    MACHINE_RUNCMD="/bin/sh"
-    echo "Defaulting to run command $MACHINE_RUNCMD"
+if [ -z "$MAP_PORTS" ]; then
+    echo "No MACHINE_PORT mappings found"
+fi
+
+if [ ! -z "$CMD_OVERRIDE" ]; then
+    CMDARG="$CMD_OVERRIDE"
+else
+    if [ ! -z "$MACHINE_RUNCMD" ]; then
+        CMDARG="$MACHINE_RUNCMD"
+    else
+        CMDARG=""
+        MACHINE_RUNCMD="DEFAULT"
+        echo "Defaulting to run command $MACHINE_RUNCMD"
+    fi
 fi
 
 PWD=$(pwd)
@@ -61,7 +76,22 @@ if [ -f "${PWD}/DEPRECATED.txt" ]; then
     sleep 2
 fi
 
-RUN_CMD="docker run -ti --rm $MAP_PORTS $LOCAL_IMAGE $MACHINE_RUNCMD"
+USER_ARG=""
+if [ ! "DEFAULT" = "$USER_NAME" ]; then
+    USER_ARG="--user=root"
+fi
+
+if [ "DEFAULT" = "$IMAGE_NAME" ]; then
+    IMAGE_NAME="${LOCAL_IMAGE_NAME}"
+fi
+
+if [ "DEFAULT" = "$TAG_NAME" ]; then
+    TAG_NAME="latest"
+fi
+
+LOCAL_IMAGE="local/$IMAGE_NAME"
+
+RUN_CMD="docker run ${USER_ARG} --rm $MAP_PORTS $LOCAL_IMAGE $CMDARG"
 
 echo $RUN_CMD
 eval $RUN_CMD
@@ -71,16 +101,12 @@ echo "EXIT CODE=$STATUS_CODE"
 if [ $STATUS_CODE -ne 0 ]; then
     REMOTE_IMAGE="${PRIVATE_DOCKER_REGISTRY}/${IMAGE_NAME}"
     echo "Possibly failed to run $LOCAL_IMAGE image, will now try $REMOTE_IMAGE"
-    RUN_CMD="docker run -ti $MAP_PORTS $REMOTE_IMAGE $MACHINE_RUNCMD"
+    RUN_CMD="docker run ${USER_ARG} $MAP_PORTS $REMOTE_IMAGE $CMDARG"
     echo $RUN_CMD
     eval $RUN_CMD
     STATUS_CODE=$?
     echo "EXIT CODE=$STATUS_CODE"
 fi
 exit $STATUS_CODE
-
-
-
-
 
 
