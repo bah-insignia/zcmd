@@ -149,7 +149,7 @@ Docker version 18.09.5, build e8ff056
 docker-compose --version
 docker-compose version 1.22.0, build f46880fe
 ```
-You can find some installation tips at https://github.com/bah-insignia/zcmd/wiki/Installation-Tips
+You can find some installation tips at https://github.com/bah-insignia/zcmd/wiki/OS-Specific-Installation-Tips
 
 WHERE CAN I READ MORE?
 ======================
