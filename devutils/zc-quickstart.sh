@@ -82,6 +82,7 @@ function cloneSourceRepo()
     #echo "CLONED REPO = $TMP_CLONED_REPO"
 }
 
+CANDIDATE_TARGET_NAME="MyQuickstart"
 SELECTED_SOURCE_PATH=""
 function pickSourceProject()
 {
@@ -96,7 +97,8 @@ function pickSourceProject()
             FNAME=$(basename $NAME)
             for SUBFPATH in $(ls -d ${NAME}*/ | awk '{print $NF}'); do
                 showpath=${SUBFPATH#"$REMOVE_PREFIX"}
-                options[i]="$FNAME -> $showpath"
+                clean=${showpath:1:(-1)}
+                options[i]="$clean"
                 fullpaths[i++]="$SUBFPATH"
             done
         fi
@@ -117,13 +119,15 @@ function pickSourceProject()
                 #Friendly quit option
                 echo "Exiting the script now!"
                 echo
-                FULLPATH=""
+                CANDIDATE_TARGET_NAME=""
+                SELECTED_SOURCE_PATH=""
                 break
             fi
             #They are crazy with this input!
             echo "Invalid input '$REPLY'"
           else
             #We got a path!
+            CANDIDATE_TARGET_NAME=$(echo "${options[$offset]}" | tr "/" "_")
             SELECTED_SOURCE_PATH="${fullpaths[$offset]}"
             break
           fi
@@ -178,6 +182,31 @@ function pickMapBranch()
 
 }
 
+function copyProject()
+(
+  local SOURCE_DIR=$1
+  local TARGET_DIR=$2
+
+  CMD="cp -Ra $SOURCE_DIR $TARGET_DIR"
+
+  if [ ! -d "$TARGET_DIR" ]; then
+    mkdir -p "$TARGET_DIR"
+  fi
+
+  echo "$CMD"
+  eval "$CMD"
+  RC=$?
+
+  if [ $RC -ne 0 ]; then
+
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "ERROR - Unable to create the quickstart content at $TARGET_DIR"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    exit 2
+
+  fi
+)
+
 #Start the process here
 
 pickSourceRepo
@@ -197,6 +226,7 @@ echo "QS_MAP=$QS_MAP"
 if [ -z "$QS_MAP" ]; then
 
   SELECTED_SOURCE_PATH=$QS_PATH_SOURCE_REPO
+  CANDIDATE_TARGET_NAME="MyQuickstart"
 
 else
   pickMapBranch "$QS_PATH_SOURCE_REPO" "$QS_MAP"
@@ -205,13 +235,25 @@ else
     exit 1
   fi
 
+  echo ""
+  echo "Pick Project from '$SELECTED_DIRBRANCH' context ..."
+
   START_PATH="$QS_PATH_SOURCE_REPO/$SELECTED_DIRBRANCH"
   pickSourceProject "$START_PATH" "$START_PATH"
+  CANDIDATE_TARGET_NAME="${SELECTED_DIRBRANCH}_${CANDIDATE_TARGET_NAME}"
 
 fi
 
-
 echo "SELECTED_SOURCE_PATH=$SELECTED_SOURCE_PATH"
 
+echo "TODO pick target folder"
+TARGET_BASEDIR="$HOME/zcmd-quickstart"
+TARGET_FOLDERNAME=$CANDIDATE_TARGET_NAME
 
+TARGET_PATH="$TARGET_BASEDIR/$TARGET_FOLDERNAME"
+
+echo
+copyProject "$SELECTED_SOURCE_PATH" "$TARGET_PATH"
+
+echo
 echo "Finished $0 v$VERSIONINFO"
