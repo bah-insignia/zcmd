@@ -46,7 +46,7 @@ function pickSourceRepo()
 
 QS_MAP=""
 QS_PATH_SOURCE_REPO=""
-cloneSourceRepo()
+function cloneSourceRepo()
 {
     local URI=$1
     local BASE_DIR=/tmp/zcmd/quickstart
@@ -82,9 +82,12 @@ cloneSourceRepo()
     #echo "CLONED REPO = $TMP_CLONED_REPO"
 }
 
-function getSourcePathOptions()
+SELECTED_SOURCE_PATH=""
+function pickSourceProject()
 {
     BASEFOLDER="$1"
+    REMOVE_PREFIX="$2"
+
     unset options i
     unset fullpaths
     i=0
@@ -92,27 +95,90 @@ function getSourcePathOptions()
         if [ ! "$NAME" = "NAMES" ]; then
             FNAME=$(basename $NAME)
             for SUBFPATH in $(ls -d ${NAME}*/ | awk '{print $NF}'); do
-                options[i]="$FNAME -> $SUBFPATH"
+                showpath=${SUBFPATH#"$REMOVE_PREFIX"}
+                options[i]="$FNAME -> $showpath"
                 fullpaths[i++]="$SUBFPATH"
-
-                echo "TODO thing $FNAME -> $SUBFPATH"
             done
         fi
     done
 
+    select OPT in "${options[@]}" "QUIT"; do
+      case $OPT in
+        "QUIT")
+          echo "Exiting the script now!"
+          echo
+          FULLPATH=""
+          break
+          ;;
+        *)
+          offset=$(($REPLY-1))
+          if [ "-1" == "$offset" ]; then
+            if [ "q" == "$REPLY" ] || [ "Q" == "$REPLY" ]; then
+                #Friendly quit option
+                echo "Exiting the script now!"
+                echo
+                FULLPATH=""
+                break
+            fi
+            #They are crazy with this input!
+            echo "Invalid input '$REPLY'"
+          else
+            #We got a path!
+            SELECTED_SOURCE_PATH="${fullpaths[$offset]}"
+            break
+          fi
+          ;;
+      esac
+    done
+
 }
 
-SELECTED_SOURCE_PATH=""
-pickSourceProject()
+function pickMapBranch()
 {
-    unset options i
-    i=0
+  local BASEDIR=$1
+  local MAP=$2
 
-    ls $TMP_CLONED_REPO
+  unset options i
+  unset fullpaths
+  i=0
+  for DIRBRANCH in $MAP; do
 
-    echo "MAP = $QS_MAP"
+    options[i++]="$DIRBRANCH"
+
+  done
+
+  select OPT in "${options[@]}" "QUIT"; do
+    case $OPT in
+      "QUIT")
+        echo "Exiting the script now!"
+        echo
+        FULLPATH=""
+        break
+        ;;
+      *)
+        offset=$(($REPLY-1))
+        if [ "-1" == "$offset" ]; then
+          if [ "q" == "$REPLY" ] || [ "Q" == "$REPLY" ]; then
+              #Friendly quit option
+              echo "Exiting the script now!"
+              echo
+              SELECTED_DIRBRANCH=""
+              break
+          fi
+          #They are crazy with this input!
+          echo "Invalid input '$REPLY'"
+        else
+          #We got a path!
+          SELECTED_DIRBRANCH="${options[$offset]}"
+          break
+        fi
+        ;;
+    esac
+  done
 
 }
+
+#Start the process here
 
 pickSourceRepo
 if [ -z "$SELECTED_REPOURI" ]; then
@@ -120,8 +186,6 @@ if [ -z "$SELECTED_REPOURI" ]; then
 fi
 
 cloneSourceRepo "$SELECTED_REPOURI"
-
-pickSourceProject
 if [ -z "$QS_PATH_SOURCE_REPO" ]; then
     exit 1
 fi
@@ -130,18 +194,24 @@ fi
 echo "QS_MAP=$QS_MAP"
 
 
-if [ ! -z "$QS_MAP" ]; then
-  #Loop through the map
-  for DIRBRANCH in $QS_MAP; do
-  
-    echo "LOOK DIRBRANCH = $DIRBRANCH"
-    START_PATH="$QS_PATH_SOURCE_REPO/$DIRBRANCH"
+if [ -z "$QS_MAP" ]; then
 
-    echo "START PATH = $START_PATH"
-    getSourcePathOptions $START_PATH
+  SELECTED_SOURCE_PATH=$QS_PATH_SOURCE_REPO
 
-  done
+else
+  pickMapBranch "$QS_PATH_SOURCE_REPO" "$QS_MAP"
+
+  if [ -z "$SELECTED_DIRBRANCH" ]; then
+    exit 1
+  fi
+
+  START_PATH="$QS_PATH_SOURCE_REPO/$SELECTED_DIRBRANCH"
+  pickSourceProject "$START_PATH" "$START_PATH"
+
 fi
+
+
+echo "SELECTED_SOURCE_PATH=$SELECTED_SOURCE_PATH"
 
 
 echo "Finished $0 v$VERSIONINFO"
