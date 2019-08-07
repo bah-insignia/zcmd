@@ -56,6 +56,11 @@ the values to be appropriate for your host computer and user details.
 If you work in a team of people, consider sharing a single zcmd/team-profile.env
 based on the pattern shown in the zcmd/team-profile-template.env file.
 
+SIMPLE EXAMPLES
+===============
+You will find several simple examples of building images with ZCMD and running Application Stacks using ZCMD in the following git repo ...
+* https://github.com/bah-insignia/zcmd-demo-rudimentary
+
 HELLO WORLD EXAMPLE STACK
 =========================
 Follow these steps to launch a simple demonstration stack using zcmd and
