@@ -1,15 +1,25 @@
 #!/bin/bash
-VERSIONINFO=20190806.1
+VERSIONINFO=20190806.3
 echo "Starting $0 v$VERSIONINFO"
 
 source $HOME/zcmd/devutils/default-docker-env.txt
+
+#Declare where we download things
+TMP_BASE_DIR="/tmp/zcmd/quickstart"
+
+#Read the arguments
+ARG1=$1
+KEEP_CLONED_REPO="NO"
+if [ "KEEP_CLONED_REPO" = "$ARG1" ]; then
+  #Prevent deletion of the TMP_BASE_DIR at end of process
+  KEEP_CLONED_REPO="YES"
+fi
 
 #Declare all the currated REPO URLS in this array.
 unset repo_options i
 i=0
 repo_options[i++]="https://github.com/bah-insignia/zcmd-demo-rudimentary"
 repo_options[i++]="https://github.com/bah-insignia/zcmd-demo-stack"
-
 
 ###########################################
 # Sets USER_ANSWER to YES or NO
@@ -31,28 +41,34 @@ function askYesNo()
     done  
 }
 
-echo
-echo "================================================================"
-echo "Welcome to the ZCMD Quickstart utility!  Use this to quickly"
-echo "install starter projects from currated web repositories."
-echo
-echo "Currently available currated repositories are the following..."
-echo
-for oneurl in "${repo_options[@]}"
-do
-	echo "  $oneurl"
-done
-echo
-echo "Visit the above URLs in your Web Browser for details about them."
-echo "================================================================"
-echo
-askYesNo "Continue?"
-if [ ! "YES" = "$USER_ANSWER" ]; then
+###########################################
+# Sets QUIT_PROGRAM to YES or NO
+###########################################
+function introBlurb()
+{
   echo
-  echo "Quiting program!"
+  echo "================================================================"
+  echo "Welcome to the ZCMD Quickstart utility!  Use this to quickly"
+  echo "install starter projects from currated web repositories."
   echo
-  exit 1
-fi
+  echo "Currently available currated repositories are the following..."
+  echo
+  for oneurl in "${repo_options[@]}"
+  do
+    echo "  $oneurl"
+  done
+  echo
+  echo "Visit the above URLs in your Web Browser for details about them."
+  echo "================================================================"
+  echo
+  QUIT_PROGRAM="UNKNOWN"
+  askYesNo "Continue?"
+  if [ "YES" = "$USER_ANSWER" ]; then
+    QUIT_PROGRAM="NO"
+  else
+    QUIT_PROGRAM="YES"
+  fi
+}
 
 SELECTED_REPOURI=""
 ###########################################
@@ -105,25 +121,26 @@ QS_PATH_SOURCE_REPO=""
 function cloneSourceRepo()
 {
     local URI=$1
-    local BASE_DIR=/tmp/zcmd/quickstart
 
     local REPO_NAME=$(basename $URI)
+
+    echo
     echo "# SOURCE REPO_NAME=$REPO_NAME"
 
-    if [ -d "$BASE_DIR/$REPO_NAME" ]; then
+    if [ -d "$TMP_BASE_DIR/$REPO_NAME" ]; then
         echo "Getting latest $1"
-        local CMD="cd $BASE_DIR/$REPO_NAME && git pull"
+        local CMD="cd $TMP_BASE_DIR/$REPO_NAME && git pull"
     else
-        mkdir -p $BASE_DIR
+        mkdir -p $TMP_BASE_DIR
         echo "Getting latest $1"
-        local CMD="cd $BASE_DIR && git clone $URI"
+        local CMD="cd $TMP_BASE_DIR && git clone $URI"
     fi
 
     echo "$CMD"
     eval "$CMD"
 
     # Get the quickstart.map.txt
-    local QS_MAPFILE_PATH="$BASE_DIR/$REPO_NAME/.quickstart/map.txt"
+    local QS_MAPFILE_PATH="$TMP_BASE_DIR/$REPO_NAME/.quickstart/map.txt"
 
     if [ ! -f "$QS_MAPFILE_PATH" ]; then
       # There is no fancy quickstart map
@@ -133,7 +150,7 @@ function cloneSourceRepo()
       QS_MAP=$(cat $QS_MAPFILE_PATH)
     fi
 
-    QS_PATH_SOURCE_REPO=$(cd "$BASE_DIR" && cd "$REPO_NAME" && pwd)
+    QS_PATH_SOURCE_REPO=$(cd "$TMP_BASE_DIR" && cd "$REPO_NAME" && pwd)
 
 }
 
@@ -300,10 +317,25 @@ function copyProject()
 
     fi
 
+    if [ "NO" = "$KEEP_CLONED_REPO" ]; then
+      echo
+      echo "# Removing quickstart temporary base directory"
+      CMD="rm -rf $TMP_BASE_DIR"
+      echo "$CMD"
+      eval "$CMD"
+    fi
+
   fi
 )
 
 #Start the process here
+introBlurb
+if [ "YES" = "$QUIT_PROGRAM" ]; then
+  echo
+  echo "Quiting!"
+  echo
+  exit 1
+fi
 
 pickSourceRepo
 if [ -z "$SELECTED_REPOURI" ]; then
@@ -324,7 +356,6 @@ if [ -z "$QS_MAP" ]; then
 
 else
   pickMapBranch "$QS_PATH_SOURCE_REPO" "$QS_MAP"
-
   if [ -z "$SELECTED_DIRBRANCH" ]; then
     exit 1
   fi

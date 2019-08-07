@@ -1,0 +1,8 @@
+#!/bin/bash
+
+CMD="zc-quickstart.sh KEEP_CLONED_REPO"
+echo
+echo $CMD
+eval $CMD
+echo
+
