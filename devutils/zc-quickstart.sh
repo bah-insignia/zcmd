@@ -1,24 +1,76 @@
 #!/bin/bash
-VERSIONINFO=20190804.1
+VERSIONINFO=20190806.1
 echo "Starting $0 v$VERSIONINFO"
 
 source $HOME/zcmd/devutils/default-docker-env.txt
 
+#Declare all the currated REPO URLS in this array.
+unset repo_options i
+i=0
+repo_options[i++]="https://github.com/bah-insignia/zcmd-demo-rudimentary"
+repo_options[i++]="https://github.com/bah-insignia/zcmd-demo-stack"
+
+
+###########################################
+# Sets USER_ANSWER to YES or NO
+###########################################
+function askYesNo()
+{
+    PROMPT_TXT=$1
+    if [ -z "$PROMPT_TXT" ]; then
+      PROMPT_TXT="Quit program?"
+    fi
+    USER_ANSWER="UNKNOWN"
+    while true; do
+      read -p "$PROMPT_TXT (y/n)" yn
+      case $yn in
+          [Yy]* ) USER_ANSWER="YES"; break;;
+          [Nn]* ) USER_ANSWER="NO"; break;;
+          * ) echo "Please press 'y' for yes or 'n' for no";;
+      esac
+    done  
+}
+
+echo
+echo "================================================================"
+echo "Welcome to the ZCMD Quickstart utility!  Use this to quickly"
+echo "install starter projects from currated web repositories."
+echo
+echo "Currently available currated repositories are the following..."
+echo
+for oneurl in "${repo_options[@]}"
+do
+	echo "  $oneurl"
+done
+echo
+echo "Visit the above URLs in your Web Browser for details about them."
+echo "================================================================"
+echo
+askYesNo "Continue?"
+if [ ! "YES" = "$USER_ANSWER" ]; then
+  echo
+  echo "Quiting program!"
+  echo
+  exit 1
+fi
 
 SELECTED_REPOURI=""
-unset options i
-i=0
-options[i++]="https://github.com/bah-insignia/zcmd-demo-rudimentary"
-options[i++]="https://github.com/bah-insignia/zcmd-demo-stack"
+###########################################
+# Blank SELECTED_REPOURI for none.
+###########################################
 function pickSourceRepo()
 {
 
-    select OPT in "${options[@]}" "QUIT"; do
+    echo
+    echo "Pick the source of your quickstart project."
+    echo
+
+    select OPT in "${repo_options[@]}" "QUIT"; do
       case $OPT in
         "QUIT")
-          echo "Exiting the script now!"
+          echo "Quiting!"
           echo
-          FULLPATH=""
+          SELECTED_REPOURI=""
           break
           ;;
         *)
@@ -26,16 +78,16 @@ function pickSourceRepo()
           if [ "-1" == "$offset" ]; then
             if [ "q" == "$REPLY" ] || [ "Q" == "$REPLY" ]; then
                 #Friendly quit option
-                echo "Exiting the script now!"
+                echo "Quiting!"
                 echo
-                FULLPATH=""
+                SELECTED_REPOURI=""
                 break
             fi
             #They are crazy with this input!
             echo "Invalid input '$REPLY'"
           else
             #We got a path!
-            SELECTED_REPOURI="${options[$offset]}"
+            SELECTED_REPOURI="${repo_options[$offset]}"
             break
           fi
           ;;
@@ -46,6 +98,10 @@ function pickSourceRepo()
 
 QS_MAP=""
 QS_PATH_SOURCE_REPO=""
+###########################################
+# QS_PATH_SOURCE_REPO is blank on fail
+# Contents of map put into QS_MAP
+###########################################
 function cloneSourceRepo()
 {
     local URI=$1
@@ -69,25 +125,31 @@ function cloneSourceRepo()
     # Get the quickstart.map.txt
     local QS_MAPFILE_PATH="$BASE_DIR/$REPO_NAME/.quickstart/map.txt"
 
-    echo "TODO look $QS_MAPFILE_PATH";
-
     if [ ! -f "$QS_MAPFILE_PATH" ]; then
+      # There is no fancy quickstart map
       QS_MAP=""
     else  
+      # Get the conntents of the fancy map
       QS_MAP=$(cat $QS_MAPFILE_PATH)
     fi
 
     QS_PATH_SOURCE_REPO=$(cd "$BASE_DIR" && cd "$REPO_NAME" && pwd)
 
-    #echo "CLONED REPO = $TMP_CLONED_REPO"
 }
 
 CANDIDATE_TARGET_NAME="MyQuickstart"
 SELECTED_SOURCE_PATH=""
+###########################################
+# Empty SELECTED_SOURCE_PATH for quit.
+###########################################
 function pickSourceProject()
 {
     BASEFOLDER="$1"
     REMOVE_PREFIX="$2"
+
+    echo
+    echo "Pick one of the available starter projects."
+    echo
 
     unset options i
     unset fullpaths
@@ -107,9 +169,9 @@ function pickSourceProject()
     select OPT in "${options[@]}" "QUIT"; do
       case $OPT in
         "QUIT")
-          echo "Exiting the script now!"
+          echo "Quiting!"
           echo
-          FULLPATH=""
+          SELECTED_SOURCE_PATH=""
           break
           ;;
         *)
@@ -117,7 +179,7 @@ function pickSourceProject()
           if [ "-1" == "$offset" ]; then
             if [ "q" == "$REPLY" ] || [ "Q" == "$REPLY" ]; then
                 #Friendly quit option
-                echo "Exiting the script now!"
+                echo "Quiting!"
                 echo
                 CANDIDATE_TARGET_NAME=""
                 SELECTED_SOURCE_PATH=""
@@ -137,10 +199,17 @@ function pickSourceProject()
 
 }
 
+###########################################
+# No selection is blank SELECTED_DIRBRANCH
+###########################################
 function pickMapBranch()
 {
   local BASEDIR=$1
   local MAP=$2
+
+  echo
+  echo "Pick one of the source directory branches."
+  echo
 
   unset options i
   unset fullpaths
@@ -154,9 +223,9 @@ function pickMapBranch()
   select OPT in "${options[@]}" "QUIT"; do
     case $OPT in
       "QUIT")
-        echo "Exiting the script now!"
+        echo "Quiting!"
         echo
-        FULLPATH=""
+        SELECTED_DIRBRANCH=""
         break
         ;;
       *)
@@ -164,7 +233,7 @@ function pickMapBranch()
         if [ "-1" == "$offset" ]; then
           if [ "q" == "$REPLY" ] || [ "Q" == "$REPLY" ]; then
               #Friendly quit option
-              echo "Exiting the script now!"
+              echo "Quiting!"
               echo
               SELECTED_DIRBRANCH=""
               break
@@ -182,27 +251,54 @@ function pickMapBranch()
 
 }
 
+###########################################
+# If fails, sets QUIT_PROGRAM="YES"
+###########################################
 function copyProject()
 (
   local SOURCE_DIR=$1
   local TARGET_DIR=$2
 
-  CMD="cp -Ra $SOURCE_DIR $TARGET_DIR"
+  QUIT_PROGRAM="NO"
+
+  CMD="cp -Ra $SOURCE_DIR/* $TARGET_DIR"
 
   if [ ! -d "$TARGET_DIR" ]; then
     mkdir -p "$TARGET_DIR"
+  else
+    echo "ls -la $TARGET_DIR"
+    eval "ls -la $TARGET_DIR"
+    echo
+    echo "WARNING! Target directory already exists!"
+    echo
+    echo "  $TARGET_DIR"
+    echo
+
+    USER_ANSWER="NO"
+    askYesNo "Continue and overwrite existing files?"
+    if [ "YES" = "$USER_ANSWER" ]; then
+      QUIT_PROGRAM="NO"
+    else
+      QUIT_PROGRAM="YES"
+    fi
+
   fi
 
-  echo "$CMD"
-  eval "$CMD"
-  RC=$?
+  if [ "NO" = "$QUIT_PROGRAM" ]; then
 
-  if [ $RC -ne 0 ]; then
+    echo
+    echo "$CMD"
+    eval "$CMD"
+    RC=$?
 
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "ERROR - Unable to create the quickstart content at $TARGET_DIR"
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    exit 2
+    if [ $RC -ne 0 ]; then
+
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      echo "ERROR - Unable to create the quickstart content at $TARGET_DIR"
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      QUIT_PROGRAM="YES"
+
+    fi
 
   fi
 )
@@ -219,9 +315,7 @@ if [ -z "$QS_PATH_SOURCE_REPO" ]; then
     exit 1
 fi
 
-
-echo "QS_MAP=$QS_MAP"
-
+#echo "QS_MAP=$QS_MAP"
 
 if [ -z "$QS_MAP" ]; then
 
@@ -235,8 +329,8 @@ else
     exit 1
   fi
 
-  echo ""
-  echo "Pick Project from '$SELECTED_DIRBRANCH' context ..."
+  echo
+  echo "You have selected the '$SELECTED_DIRBRANCH' context ..."
 
   START_PATH="$QS_PATH_SOURCE_REPO/$SELECTED_DIRBRANCH"
   pickSourceProject "$START_PATH" "$START_PATH"
@@ -246,14 +340,44 @@ fi
 
 echo "SELECTED_SOURCE_PATH=$SELECTED_SOURCE_PATH"
 
-echo "TODO pick target folder"
 TARGET_BASEDIR="$HOME/zcmd-quickstart"
 TARGET_FOLDERNAME=$CANDIDATE_TARGET_NAME
-
 TARGET_PATH="$TARGET_BASEDIR/$TARGET_FOLDERNAME"
 
 echo
+QUIT_PROGRAM="UNKNOWN"
 copyProject "$SELECTED_SOURCE_PATH" "$TARGET_PATH"
+if [ "YES" = "$QUIT_PROGRAM" ]; then
+  echo
+  echo "Quiting program without completing installation."
+  echo
+  exit 1
+fi
+
+echo $SELECTED_REPOURI > "$TARGET_PATH/.zcmd-quickstart-source-info.txt"
+
+echo
+echo "Quickstart installation complete!"
+echo 
+CMD="ls -la $TARGET_PATH"
+echo "$CMD"
+eval "$CMD"
+echo
+
+echo "######################################################################"
+echo 
+echo "Quickstart project has been installed to directory ..."
+echo
+echo "  $TARGET_PATH"
+echo
+README_PATH="$TARGET_PATH/README.md"
+if [ -f "$README_PATH" ]; then
+  echo "Tips and information can be found here ..."
+  echo
+  echo "  $README_PATH"
+  echo
+fi
+echo "######################################################################"
 
 echo
 echo "Finished $0 v$VERSIONINFO"
