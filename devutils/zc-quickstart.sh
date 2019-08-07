@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSIONINFO=20190806.3
+VERSIONINFO=20190806.4
 echo "Starting $0 v$VERSIONINFO"
 
 source $HOME/zcmd/devutils/default-docker-env.txt
@@ -15,7 +15,7 @@ if [ "KEEP_CLONED_REPO" = "$ARG1" ]; then
   KEEP_CLONED_REPO="YES"
 fi
 
-#Declare all the currated REPO URLS in this array.
+#Declare all the curated REPO URLS in this array.
 unset repo_options i
 i=0
 repo_options[i++]="https://github.com/bah-insignia/zcmd-demo-rudimentary"
@@ -49,9 +49,9 @@ function introBlurb()
   echo
   echo "================================================================"
   echo "Welcome to the ZCMD Quickstart utility!  Use this to quickly"
-  echo "install starter projects from currated web repositories."
+  echo "install starter projects from curated web repositories."
   echo
-  echo "Currently available currated repositories are the following..."
+  echo "Currently available curated repositories are the following..."
   echo
   for oneurl in "${repo_options[@]}"
   do

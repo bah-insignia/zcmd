@@ -1,0 +1,15 @@
+PURPOSE
+-------
+Quickly install a starter project pulled from one of the available curated 
+git web repositories.
+
+SYNTAX
+------
+zcmd quickstart
+
+NOTE
+----
+This quickstart process walks you through selection of a starter project.
+The selected project will be installed into the following location...
+
+  $HOME/zcmd-quickstart
