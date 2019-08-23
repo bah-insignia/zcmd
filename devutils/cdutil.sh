@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSIONINFO=20190821.1
+VERSIONINFO=20190821.2
 
 # This utility only works if you source it (helps you jump to zcmd stacks)
 # Consider adding this to your .bashrc file...
@@ -42,6 +42,7 @@ fi
 
 FULLPATH=""
 
+# Collect all the paths we wil show the user.
 function getFullPathOptions()
 {
     unset options i
@@ -65,6 +66,19 @@ function getFullPathOptions()
                     else
                         SUBTHINGS=$(ls -d ${NAME}*/ | awk '{print $NF}')
                     fi
+                    if [ -z "$FILTER" ] || [ $(echo "$NAME" | grep "$FILTER") ]; then
+                        HERE_STACK="${NAME}/stack.env"
+                        if [ -f "$HERE_STACK" ]; then
+                            options[i]="$FNAME -> $NAME"
+                            fullpaths[i++]="$NAME"
+                        else
+                            HERE_MACHINE="${NAME}/machine.env"
+                            if [ -f "$HERE_MACHINE" ]; then
+                                options[i]="$FNAME -> $NAME"
+                                fullpaths[i++]="$NAME"
+                            fi
+                        fi
+                    fi    
                     for SUBFPATH in ${SUBTHINGS[@]}; do
 
                         if [ -z "$FILTER" ] || [ $(echo "$SUBFPATH" | grep "$FILTER") ]; then
@@ -98,6 +112,7 @@ function getFullPathOptions()
     done 
 }
 
+# Show user all our collected paths and have them pick one.
 function pickFolder()
 {
     select OPT in "${options[@]}" "QUIT"; do
@@ -130,6 +145,7 @@ function pickFolder()
     done
 }
 
+# Kick off the cool things now
 getFullPathOptions
 pickFolder
 
