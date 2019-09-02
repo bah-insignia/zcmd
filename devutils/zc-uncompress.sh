@@ -50,13 +50,13 @@ echo "SOURCE FILE compression is $COMPRESSION_TYPE"
 CMD="NO OPERATION"
 case "$COMPRESSION_TYPE" in
     "ZIP" )
-        CMD="unzip $SOURCEFILE -d $OUTPUTPATH"  
+        CMD="sudo unzip $SOURCEFILE -d $OUTPUTPATH"
         ;;
     "TAR.GZ" )
-        CMD="tar -xvzf $SOURCEFILE -C $OUTPUTPATH" 
+        CMD="sudo tar -xvzf $SOURCEFILE -C $OUTPUTPATH"
         ;;
     "GZ" )
-        CMD="gzip -dkvf $SOURCEFILE" 
+        CMD="sudo gzip -dkvf $SOURCEFILE"
         ;;
     "*" )
         echo "ERROR: Unrecognized compression for $SOURCEFILE"
