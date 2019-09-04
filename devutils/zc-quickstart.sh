@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSIONINFO=20190806.4
+VERSIONINFO=20190902.1
 echo "Starting $0 v$VERSIONINFO"
 
 source $HOME/zcmd/devutils/default-docker-env.txt
@@ -278,6 +278,14 @@ function copyProject()
 
   QUIT_PROGRAM="NO"
 
+  if [ -z "$SOURCE_DIR" ]; then
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "ERROR - Cannot copy from blank source path!"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    QUIT_PROGRAM="YES"
+    return 2
+  fi
+
   CMD="cp -Ra $SOURCE_DIR/* $TARGET_DIR"
 
   if [ ! -d "$TARGET_DIR" ]; then
@@ -326,6 +334,8 @@ function copyProject()
     fi
 
   fi
+
+  return 0
 )
 
 #Start the process here
@@ -369,6 +379,10 @@ else
 
 fi
 
+if [ -z "$SELECTED_SOURCE_PATH" ]; then
+  echo "Goodbye!"
+  exit 1
+fi
 echo "SELECTED_SOURCE_PATH=$SELECTED_SOURCE_PATH"
 
 TARGET_BASEDIR="$HOME/zcmd-quickstart"
