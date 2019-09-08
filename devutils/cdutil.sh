@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSIONINFO=20190821.2
+VERSIONINFO=20190908.1
 
 # This utility only works if you source it (helps you jump to zcmd stacks)
 # Consider adding this to your .bashrc file...
@@ -42,73 +42,82 @@ fi
 
 FULLPATH=""
 
-# Collect all the paths we wil show the user.
+# Adds found paths into the options list
+function _addFullPathOptions()
+{
+    echo "Checking base $BASEFOLDER"
+    if [ -d "$BASEFOLDER" ]; then
+        subdircount=`find $BASEFOLDER -maxdepth 1 -type d | wc -l`
+        if [ $subdircount -eq 1 ]; then
+            THINGS=()
+        else
+            THINGS=$(ls -d ${BASEFOLDER}/*/ | awk '{print $NF}')
+        fi
+        for NAME in ${THINGS[@]}; do
+            if [ ! "$NAME" = "NAMES" ]; then
+                FNAME=$(basename $NAME)
+                subdircount=`find $NAME -maxdepth 1 -type d | wc -l`
+                if [ $subdircount -eq 1 ]; then
+                    SUBTHINGS=()
+                else
+                    SUBTHINGS=$(ls -d ${NAME}*/ | awk '{print $NF}')
+                fi
+                if [ -z "$FILTER" ] || [ $(echo "$NAME" | grep "$FILTER") ]; then
+                    HERE_STACK="${NAME}/stack.env"
+                    if [ -f "$HERE_STACK" ]; then
+                        options[i]="$FNAME -> $NAME"
+                        fullpaths[i++]="$NAME"
+                    else
+                        HERE_MACHINE="${NAME}/machine.env"
+                        if [ -f "$HERE_MACHINE" ]; then
+                            options[i]="$FNAME -> $NAME"
+                            fullpaths[i++]="$NAME"
+                        fi
+                    fi
+                fi    
+                for SUBFPATH in ${SUBTHINGS[@]}; do
+
+                    if [ -z "$FILTER" ] || [ $(echo "$SUBFPATH" | grep "$FILTER") ]; then
+
+                        if [ $(echo "$SUBFPATH" | grep "$FILTER2") ]; then
+                            options[i]="$FNAME -> $SUBFPATH"
+                            fullpaths[i++]="$SUBFPATH"
+                        fi
+                        DOCROOTPATH="${SUBFPATH}webserver/docroot"
+                        if [ -d "$DOCROOTPATH" ] && [ $(echo "$DOCROOTPATH" | grep "$FILTER2") ]; then
+                            options[i]="$FNAME -> $DOCROOTPATH"
+                            fullpaths[i++]="$DOCROOTPATH"
+                        else
+                            DOCROOTPATH="${SUBFPATH}webserver"
+                            if [ -d "$DOCROOTPATH" ] && [ $(echo "$DOCROOTPATH" | grep "$FILTER2") ]; then
+                                options[i]="$FNAME -> $DOCROOTPATH"
+                                fullpaths[i++]="$DOCROOTPATH"
+                            else
+                                DOCROOTPATH="${SUBFPATH}docroot"
+                                if [ -d "$DOCROOTPATH" ] && [ $(echo "$DOCROOTPATH" | grep "$FILTER2") ]; then
+                                    options[i]="$FNAME -> $DOCROOTPATH"
+                                    fullpaths[i++]="$DOCROOTPATH"
+                                fi
+                            fi
+                        fi
+                    fi
+                done
+            fi
+        done
+    fi
+}
+
+# Collect all the paths we will show the user.
 function getFullPathOptions()
 {
     unset options i
     unset fullpaths
     i=0
     for BASEFOLDER in ${CDUTIL_BASEFOLDER_LIST[@]}; do
-        echo "Checking base $BASEFOLDER"
-        if [ -d "$BASEFOLDER" ]; then
-            subdircount=`find $BASEFOLDER -maxdepth 1 -type d | wc -l`
-            if [ $subdircount -eq 1 ]; then
-                THINGS=()
-            else
-                THINGS=$(ls -d ${BASEFOLDER}/*/ | awk '{print $NF}')
-            fi
-            for NAME in ${THINGS[@]}; do
-                if [ ! "$NAME" = "NAMES" ]; then
-                    FNAME=$(basename $NAME)
-                    subdircount=`find $NAME -maxdepth 1 -type d | wc -l`
-                    if [ $subdircount -eq 1 ]; then
-                        SUBTHINGS=()
-                    else
-                        SUBTHINGS=$(ls -d ${NAME}*/ | awk '{print $NF}')
-                    fi
-                    if [ -z "$FILTER" ] || [ $(echo "$NAME" | grep "$FILTER") ]; then
-                        HERE_STACK="${NAME}/stack.env"
-                        if [ -f "$HERE_STACK" ]; then
-                            options[i]="$FNAME -> $NAME"
-                            fullpaths[i++]="$NAME"
-                        else
-                            HERE_MACHINE="${NAME}/machine.env"
-                            if [ -f "$HERE_MACHINE" ]; then
-                                options[i]="$FNAME -> $NAME"
-                                fullpaths[i++]="$NAME"
-                            fi
-                        fi
-                    fi    
-                    for SUBFPATH in ${SUBTHINGS[@]}; do
-
-                        if [ -z "$FILTER" ] || [ $(echo "$SUBFPATH" | grep "$FILTER") ]; then
-
-                            if [ $(echo "$SUBFPATH" | grep "$FILTER2") ]; then
-                                options[i]="$FNAME -> $SUBFPATH"
-                                fullpaths[i++]="$SUBFPATH"
-                            fi
-                            DOCROOTPATH="${SUBFPATH}webserver/docroot"
-                            if [ -d "$DOCROOTPATH" ] && [ $(echo "$DOCROOTPATH" | grep "$FILTER2") ]; then
-                                options[i]="$FNAME -> $DOCROOTPATH"
-                                fullpaths[i++]="$DOCROOTPATH"
-                            else
-                                DOCROOTPATH="${SUBFPATH}webserver"
-                                if [ -d "$DOCROOTPATH" ] && [ $(echo "$DOCROOTPATH" | grep "$FILTER2") ]; then
-                                    options[i]="$FNAME -> $DOCROOTPATH"
-                                    fullpaths[i++]="$DOCROOTPATH"
-                                else
-                                    DOCROOTPATH="${SUBFPATH}docroot"
-                                    if [ -d "$DOCROOTPATH" ] && [ $(echo "$DOCROOTPATH" | grep "$FILTER2") ]; then
-                                        options[i]="$FNAME -> $DOCROOTPATH"
-                                        fullpaths[i++]="$DOCROOTPATH"
-                                    fi
-                                fi
-                            fi
-                        fi
-                    done
-                fi
-            done
-        fi
+        _addFullPathOptions $BASEFOLDER
+    done 
+    for BASEFOLDER in ${CDUTIL_CUSTOM_LIST[@]}; do
+        _addFullPathOptions $BASEFOLDER
     done 
 }
 
