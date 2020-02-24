@@ -1,0 +1,8 @@
+#!/bin/bash
+
+CMD="docker run --privileged --pid=host docker/desktop-reclaim-space"
+echo
+echo $CMD
+eval $CMD
+echo 'The container "docker/desktop-reclaim-space" has been run. You will need to remove the container with "docker container prune"'
+echo
