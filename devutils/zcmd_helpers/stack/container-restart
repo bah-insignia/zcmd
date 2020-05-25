@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSIONINFO=20180514.1
+VERSIONINFO=20200525.1
 
 BASENAME=$(basename $0)
 echo "SCRIPT PURPOSE: Restart a running docker container"
@@ -48,20 +48,20 @@ function pickContainer()
 
     select OPT in "${options[@]}" "QUIT"; do
       case $OPT in
-        *_*)
-          echo "Container named $OPT selected ..."
-          echo
-          CONTAINERNAME="$OPT"
-          break
-          ;;
         "QUIT")
           echo "Exiting the script now!"
           echo
           CONTAINERNAME=""
           break
           ;;
+        '')
+          echo "Not a valid option"
+          ;;
         *)
-          echo "This is not an option"
+          echo "Container named $OPT selected ..."
+          echo
+          CONTAINERNAME="$OPT"
+          break
           ;;
       esac
     done

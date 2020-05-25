@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSIONINFO="20180808.1"
+VERSIONINFO="20200525.1"
 echo "Started $0 v$VERSIONINFO"
 
 CONTAINERNAME=$1
@@ -31,20 +31,20 @@ function pickCONTAINERNAME()
 
     select OPT in "${options[@]}" "QUIT"; do
       case $OPT in
-        *_*)
-          echo "CONTAINERNAME named $OPT selected ..."
-          echo
-          CONTAINERNAME="$OPT"
-          break
-          ;;
         "QUIT")
           echo "Exiting the script now!"
           echo
           CONTAINERNAME=""
           break
           ;;
+        '')
+          echo "Not a valid option"
+          ;;
         *)
-          echo "This is not an option"
+          echo "Container named $OPT selected ..."
+          echo
+          CONTAINERNAME="$OPT"
+          break
           ;;
       esac
     done
