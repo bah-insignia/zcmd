@@ -17,7 +17,7 @@ print("STARTING EXPORT VERSION " + STACK_ENV_VERSIONINFO)
 #Parse all the arguments
 parser = argparse.ArgumentParser(description='Export application database')
 parser.add_argument('APP_PLATFORM_NAME', help='AUTOMATIC App platform name (e.g., drupal)')
-parser.add_argument('APP_PLATFORM_MAJOR_VERSION', help='AUTOMATIC App platform major version number (e.g., 7 or 8)')
+parser.add_argument('APP_PLATFORM_MAJOR_VERSION', help='AUTOMATIC App platform major version number (e.g., 7, 8 or 9)')
 parser.add_argument('--localcopy', '-lc', help='Save export to local file system', action='store_true')
 parser.add_argument('--nos3', help='Do not export to s3', action='store_true')
 args = parser.parse_args()
@@ -35,6 +35,9 @@ if APP_PLATFORM_NAME=='drupal':
         DRUSH_CMD='sql-dump'
         DRUSH_EXTRA_ARG='--extra=--no-data'
     elif APP_PLATFORM_MAJOR_VERSION == '8':
+        DRUSH_CMD='sql:dump'
+        DRUSH_EXTRA_ARG='--extra-dump=--no-data'
+    elif APP_PLATFORM_MAJOR_VERSION == '9':
         DRUSH_CMD='sql:dump'
         DRUSH_EXTRA_ARG='--extra-dump=--no-data'
     else:

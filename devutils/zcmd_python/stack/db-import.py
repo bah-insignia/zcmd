@@ -18,7 +18,7 @@ print("STARTING IMPORT VERSION " + STACK_ENV_VERSIONINFO)
 #Parse all the arguments
 parser = argparse.ArgumentParser(description='Import application database')
 parser.add_argument('APP_PLATFORM_NAME', help='AUTOMATIC App platform name (e.g., drupal)')
-parser.add_argument('APP_PLATFORM_MAJOR_VERSION', help='AUTOMATIC App platform major version number (e.g., 7 or 8)')
+parser.add_argument('APP_PLATFORM_MAJOR_VERSION', help='AUTOMATIC App platform major version number (e.g., 7, 8 or 9)')
 parser.add_argument('SRC_FOLDERNAME', nargs='?', default='?', help='REQUIRED subfolder name (environment name from the export operation, ignored if -lc flag is used)')
 parser.add_argument('SRC_FILENAME', nargs='?', default='?', help='REQUIRED filename to import (or ? to get listing of available files)')
 parser.add_argument('--localcopy', '-lc', help='Import from local file system instead of s3', action='store_true')
@@ -79,6 +79,8 @@ if APP_PLATFORM_NAME=='drupal':
     if APP_PLATFORM_MAJOR_VERSION == '7':
         DRUSH_DROP_CMD='sql-drop'
     elif APP_PLATFORM_MAJOR_VERSION == '8':
+        DRUSH_DROP_CMD='sql:drop'
+    elif APP_PLATFORM_MAJOR_VERSION == '9':
         DRUSH_DROP_CMD='sql:drop'
     else:
         raise Exception("INVALID APP_PLATFORM_MAJOR_VERSION="+APP_PLATFORM_MAJOR_VERSION)
