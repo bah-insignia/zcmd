@@ -13,7 +13,7 @@ REQUIRED STACK ENVIRONMENT VARS
 Your "stack.env" must declare both of the following variables...
 
     APP_PLATFORM_NAME (e.g., "drupal")
-    APP_PLATFORM_MAJOR_VERSION (e.g., 7 or 8)
+    APP_PLATFORM_MAJOR_VERSION (e.g., 7, 8 or 9)
 
 NOTES ABOUT FILE PLACED INTO S3
 -------------------------------
