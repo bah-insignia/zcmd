@@ -34,7 +34,7 @@ Some of the commands assume you have the following installed on your host:
 * docker         <-- required for everything (you dont have this, you dont have docker)
 * docker-compose <-- required for almost everything (how to build "zcmd stacks")
 * aws utilities  <-- required for S3 interactions (e.g., backup files to S3/restore files from S3)
-* mysql-client   <-- required for most database actions where mysql is persistend on the host
+* mysql-client   <-- required for most database actions where mysql is persisted on the host
 * python3        <-- required for some operations
 
 Important Configuration Settings
