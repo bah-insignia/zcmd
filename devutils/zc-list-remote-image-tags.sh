@@ -8,7 +8,6 @@ fi
 if [ -z "$PRIVATE_DOCKER_FULL_REGISTRY_URL" ]; then
     echo No external docker registry found
 else
-    echo Listing from our private Docker Registry....
     echo "Listing tags of ${IMAGENAME} from our private Docker Registry ..."
     CMD="curl -4 ${PRIVATE_DOCKER_FULL_REGISTRY_URL}/v2/${IMAGENAME}/tags/list --insecure"
     echo $CMD
