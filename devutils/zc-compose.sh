@@ -54,12 +54,12 @@ echo "... PUSH_VARS=$PUSH_VARS"
 
 #LAUNCH THE STACK
 cd $(pwd)
-ACTIONCMD="$PUSH_VARS docker-compose $ACTION $CMDARGS"
+ACTIONCMD="$PUSH_VARS docker compose $ACTION $CMDARGS"
 echo $ACTIONCMD
 if [ "up" = "$ACTION" ]; then
-    eval "$PUSH_VARS docker-compose $ACTION $CMDARGS &"
+    eval "$PUSH_VARS docker compose $ACTION $CMDARGS &"
 else
-    eval "$PUSH_VARS docker-compose $ACTION $CMDARGS"
+    eval "$PUSH_VARS docker compose $ACTION $CMDARGS"
 fi
 
 echo Listing of all current docker processes and their status...

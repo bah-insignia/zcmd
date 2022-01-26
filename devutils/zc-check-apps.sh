@@ -54,7 +54,7 @@ function findRecommendedApp
 #Check the apps now
 #Look for required apps on the path
 findRequiredApp "docker" "docker application" "required for host to interact with docker resources"
-findRequiredApp "docker-compose" "docker-compose client" "required for host to launch runtime stacks"
+findRequiredApp "docker compose" "docker compose client" "required for host to launch runtime stacks"
 findRequiredApp "mysql" "mysql client" "required for the host to load the database"
 
 #Look for recommended apps on the path

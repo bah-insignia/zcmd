@@ -1,7 +1,7 @@
 # VALUES IN THIS FILE HAVE GLOBAL EFFECT
 # These are the ENVIRONMENT settings intended
 # as default values for reference from
-# the "Dockerfile" and "docker-compose.yml" files.
+# the "Dockerfile" and "docker compose.yml" files.
 
 ALLOW_SHOW_INFO=$1
 if [ ! "YES" = "$ALLOW_SHOW_INFO" ]; then

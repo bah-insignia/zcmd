@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "EXPERIMENTAL SCRIPT FOR WINDOWS WSL BIND FIXING"
 echo "Uses bind approach to resolve difference between"
-echo "the docker-compose /c root and the WSL /mnt/c root"
+echo "the docker compose /c root and the WSL /mnt/c root"
 echo
 echo "To run, source the script. Examples ..."
 echo ">> . $0"
@@ -50,5 +50,5 @@ if [ $EC -ne 0 ]; then
 fi
 pwd
 echo
-echo "Done! The docker-compose bind mounts will work from this location and its subdirectories."
+echo "Done! The docker compose bind mounts will work from this location and its subdirectories."
 echo

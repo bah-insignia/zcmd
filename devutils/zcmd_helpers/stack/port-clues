@@ -36,7 +36,7 @@ echo "### LISTING STACK PORT DECLARATIONS ..."
 cat ./stack.env | grep "$KEYWORD" | grep -v \#
 echo
 echo "### LISTING DOCKER COMPOSE PORT DECLARATIONS ..."
-cat ./docker-compose.yml | grep "$KEYWORD" | grep -v \#
+cat ./docker compose.yml | grep "$KEYWORD" | grep -v \#
 echo
 
 echo "Done with all listings of '${KEYWORD}' in files."

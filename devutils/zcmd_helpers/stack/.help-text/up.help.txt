@@ -13,8 +13,8 @@ ENVIRONMENT_CONTEXT = Optional override of the default value (e.g., pass PROD
 
                       NOTE: To see if your stack supports different configurations
                             by ENVIRONMENT_CONTEXT, look for that name in the
-                            docker-compose.yml of your stack.
+                            docker compose.yml of your stack.
 
-COMPOSE_CMDARGS     = Optional support for passing some docker-compose command
+COMPOSE_CMDARGS     = Optional support for passing some docker compose command
                       line arguments.
 

@@ -1,7 +1,7 @@
 PURPOSE
 -------
 Pull down into our local cache all the shared CORE images and also all 
-the images named in the docker-compose.yml file.
+the images named in the docker compose.yml file.
 
 SYNTAX
 ------
